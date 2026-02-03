@@ -29,144 +29,51 @@ const OPPOSITES = {
 
 const THEMES = [
   {
-    id: "meadow",
-    name: "Meadow",
+    id: "candy",
+    name: "Candy",
     ui: {
-      "--bg": "#eef7b2",
-      "--panel": "#fff4d4",
-      "--text": "#2a241a",
-      "--muted": "#7c6a4d",
-      "--panel-border": "#e6c78d",
-      "--panel-shadow": "#e6c78d",
-      "--button-border": "#e3b861",
-      "--button-shadow": "#e3b861",
-      "--button-bg": "#fff2c7",
-      "--canvas-bg": "#f9f1c6",
-      "--overlay-bg": "rgba(255, 247, 216, 0.78)",
+      "--bg": "#ffd6f3",
+      "--panel": "#ffe7f7",
+      "--text": "#5a2b4f",
+      "--muted": "#9c6a8b",
+      "--panel-border": "#f7b8db",
+      "--panel-shadow": "#e89fc9",
+      "--button-border": "#f2a3ce",
+      "--button-shadow": "#e08bbb",
+      "--button-bg": "#ffe3f2",
+      "--canvas-bg": "#ffe9f6",
+      "--overlay-bg": "rgba(255, 233, 246, 0.9)",
     },
     palette: {
-      canvas: "#f9f1c6",
-      grid: "#e5d2a3",
-      snake: "#63d36d",
-      snakeHead: "#56c95f",
-      snakeStroke: "#2f7a3c",
-      food: "#ff6b6b",
-      foodLeaf: "#4acb6b",
-      foodStem: "#6b4f2a",
+      canvas: "#ffe9f6",
+      grid: "#f6c8e3",
+      snake: "#ff4da6",
+      snakeHead: "#ff2f92",
+      snakeStroke: "#b61b63",
+      food: "#ff7ac8",
+      foodLeaf: "#7bdff6",
+      foodStem: "#ffb3d9",
       bonus: "#ffdf4d",
-      bonusStroke: "#c58a1a",
-      hazard: "#8c5a2b",
-      hazardStroke: "#5b3719",
+      bonusStroke: "#d28a18",
+      hazard: "#c7e6ff",
+      hazardStroke: "#7bb8e6",
       eyeWhite: "#ffffff",
-      eyePupil: "#2a241a",
+      eyePupil: "#5a2b4f",
     },
     fruits: [
-      { id: "apple", color: "#ff4242" },
-      { id: "berry", color: "#7c3aed" },
-      { id: "peach", color: "#ff9f5a" },
+      { id: "candy", color: "#ff7ac8" },
+      { id: "lollipop", color: "#ff6b9e" },
+      { id: "donut", color: "#ff9ad5" },
+      { id: "gummy", color: "#ff5ac1" },
     ],
     bonusItems: [
       { id: "star", color: "#ffdf4d" },
-      { id: "coin", color: "#ffe07a" },
+      { id: "gem", color: "#6ee7ff" },
     ],
     hazards: [
-      { id: "thorns", color: "#8c5a2b" },
-      { id: "rock", color: "#6b5a4a" },
-      { id: "image", color: "#6b5a4a", size: 4, image: true },
-    ],
-  },
-  {
-    id: "jungle",
-    name: "Jungle",
-    ui: {
-      "--bg": "#1d3a2a",
-      "--panel": "#1f3d2e",
-      "--text": "#f1f7ea",
-      "--muted": "#b8c8b1",
-      "--panel-border": "#2b5b41",
-      "--panel-shadow": "#173025",
-      "--button-border": "#2b5b41",
-      "--button-shadow": "#173025",
-      "--button-bg": "#244737",
-      "--canvas-bg": "#1d3a2a",
-      "--overlay-bg": "rgba(25, 44, 33, 0.78)",
-    },
-    palette: {
-      canvas: "#1d3a2a",
-      grid: "#2a4f3a",
-      snake: "#2fb66b",
-      snakeHead: "#3ed07c",
-      snakeStroke: "#0f4f2a",
-      food: "#ffb347",
-      foodLeaf: "#4acb6b",
-      foodStem: "#7a5b2b",
-      bonus: "#ffd24a",
-      bonusStroke: "#b87812",
-      hazard: "#b6412f",
-      hazardStroke: "#5e1f14",
-      eyeWhite: "#f9f7ef",
-      eyePupil: "#1a1a1a",
-    },
-    fruits: [
-      { id: "banana", color: "#ffd24a" },
-      { id: "mango", color: "#ff9f1a" },
-      { id: "papaya", color: "#ff7b54" },
-    ],
-    bonusItems: [
-      { id: "totem", color: "#ffd24a" },
-      { id: "gem", color: "#4ae7c0" },
-    ],
-    hazards: [
-      { id: "vines", color: "#b6412f" },
-      { id: "spikes", color: "#8b1c1c" },
-      { id: "image", color: "#b6412f", size: 4, image: true },
-    ],
-  },
-  {
-    id: "desert",
-    name: "Desert",
-    ui: {
-      "--bg": "#f5d59a",
-      "--panel": "#fff0cf",
-      "--text": "#5a3f21",
-      "--muted": "#8c6c46",
-      "--panel-border": "#e6c28b",
-      "--panel-shadow": "#d7b176",
-      "--button-border": "#e0b071",
-      "--button-shadow": "#c89458",
-      "--button-bg": "#ffe5b4",
-      "--canvas-bg": "#f4e2b9",
-      "--overlay-bg": "rgba(255, 244, 216, 0.82)",
-    },
-    palette: {
-      canvas: "#f4e2b9",
-      grid: "#e5c98e",
-      snake: "#d9a166",
-      snakeHead: "#e6b57a",
-      snakeStroke: "#9b6a37",
-      food: "#ff7a59",
-      foodLeaf: "#5bbd74",
-      foodStem: "#8a5a2b",
-      bonus: "#ffc93a",
-      bonusStroke: "#b87512",
-      hazard: "#7b4f24",
-      hazardStroke: "#4d2f12",
-      eyeWhite: "#fff7ef",
-      eyePupil: "#3b2b1a",
-    },
-    fruits: [
-      { id: "cactus", color: "#ff5aa5" },
-      { id: "date", color: "#c2652f" },
-      { id: "orange", color: "#ff9b1a" },
-    ],
-    bonusItems: [
-      { id: "relic", color: "#ffc93a" },
-      { id: "sun", color: "#ffcc55" },
-    ],
-    hazards: [
-      { id: "bones", color: "#7b4f24" },
-      { id: "cactus-spike", color: "#8a5a2b" },
-      { id: "image", color: "#7b4f24", size: 4, image: true },
+      { id: "cloud", color: "#c7e6ff" },
+      { id: "cloud-dark", color: "#a5d3ff" },
+      { id: "image", color: "#c7e6ff", size: 4, image: true },
     ],
   },
 ];
@@ -546,6 +453,18 @@ function roundRect(x, y, w, h, r) {
 function drawFood(point, fruit) {
   const type = fruit || { id: "apple", color: colors.food };
   switch (type.id) {
+    case "candy":
+      drawCandy(point, type.color);
+      break;
+    case "lollipop":
+      drawLollipop(point, type.color);
+      break;
+    case "donut":
+      drawDonut(point, type.color);
+      break;
+    case "gummy":
+      drawGummy(point, type.color);
+      break;
     case "berry":
       drawBerry(point, type.color);
       break;
@@ -702,6 +621,70 @@ function drawOrange(point, color) {
   ctx.fill();
 }
 
+function drawCandy(point, color) {
+  const { centerX, centerY } = fruitMetrics(point, 0.3);
+  const width = cellSize * 0.36;
+  const height = cellSize * 0.2;
+  ctx.fillStyle = color;
+  roundRect(centerX - width / 2, centerY - height / 2, width, height, height / 2);
+  ctx.fill();
+  ctx.fillStyle = colors.foodStem;
+  ctx.beginPath();
+  ctx.moveTo(centerX - width / 2, centerY - height / 2);
+  ctx.lineTo(centerX - width / 2 - cellSize * 0.08, centerY);
+  ctx.lineTo(centerX - width / 2, centerY + height / 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(centerX + width / 2, centerY - height / 2);
+  ctx.lineTo(centerX + width / 2 + cellSize * 0.08, centerY);
+  ctx.lineTo(centerX + width / 2, centerY + height / 2);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawLollipop(point, color) {
+  const { centerX, centerY, radius } = fruitMetrics(point, 0.26);
+  ctx.strokeStyle = colors.foodStem;
+  ctx.lineWidth = Math.max(2, cellSize * 0.08);
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY + radius);
+  ctx.lineTo(centerX, centerY + radius + cellSize * 0.2);
+  ctx.stroke();
+
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.bonusStroke;
+  ctx.lineWidth = Math.max(1, cellSize * 0.05);
+  ctx.stroke();
+}
+
+function drawDonut(point, color) {
+  const { centerX, centerY, radius } = fruitMetrics(point, 0.28);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffd6f3";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius * 0.45, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawGummy(point, color) {
+  const { centerX, centerY } = fruitMetrics(point, 0.26);
+  const size = cellSize * 0.26;
+  ctx.fillStyle = color;
+  roundRect(centerX - size, centerY - size, size * 2, size * 2, size * 0.6);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  ctx.beginPath();
+  ctx.arc(centerX - size * 0.3, centerY - size * 0.3, size * 0.25, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 function drawBonus(point) {
   const type = point.type || { id: "star", color: colors.bonus };
   switch (type.id) {
@@ -818,11 +801,7 @@ function drawHazard(hazard) {
     drawHazardImage(hazard);
     return;
   }
-  if (id.includes("rock") || id.includes("bones")) {
-    drawRock(hazard);
-  } else {
-    drawSpikes(hazard);
-  }
+  drawCloud(hazard);
 }
 
 function drawRock(point) {
@@ -861,6 +840,27 @@ function drawSpikes(point) {
   ctx.strokeStyle = colors.hazardStroke;
   ctx.lineWidth = Math.max(1, sizePx * 0.05);
   ctx.stroke();
+}
+
+function drawCloud(hazard) {
+  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  const r = sizePx * 0.18;
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  const offsets = [
+    { x: -r * 1.4, y: 0 },
+    { x: -r * 0.4, y: -r * 0.8 },
+    { x: r * 0.5, y: -r * 0.4 },
+    { x: r * 1.3, y: 0 },
+  ];
+  offsets.forEach((o) => {
+    ctx.beginPath();
+    ctx.arc(centerX + o.x, centerY + o.y, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.fillRect(centerX - r * 1.8, centerY, r * 3.6, r * 1.2);
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, sizePx * 0.04);
+  ctx.strokeRect(centerX - r * 1.8, centerY - r * 0.2, r * 3.6, r * 1.4);
 }
 
 function fruitMetrics(point, scale) {
