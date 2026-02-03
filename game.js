@@ -11,6 +11,7 @@ const HIGH_SCORE_KEY = "vibesnake_highscores";
 const MAX_HIGH_SCORES = 10;
 const GLOBAL_LEADERBOARD_URL = "https://vibesnake-leaderboard.daryl-e86.workers.dev/api/leaderboard";
 const LOCAL_DEV_LEADERBOARD_URL = "http://localhost:8787/api/leaderboard";
+const HAZARD_IMAGE_SRC = "assets/hazard.png";
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -71,6 +72,7 @@ const THEMES = [
     hazards: [
       { id: "thorns", color: "#8c5a2b" },
       { id: "rock", color: "#6b5a4a" },
+      { id: "image", color: "#6b5a4a", size: 4, image: true },
     ],
   },
   {
@@ -117,6 +119,7 @@ const THEMES = [
     hazards: [
       { id: "vines", color: "#b6412f" },
       { id: "spikes", color: "#8b1c1c" },
+      { id: "image", color: "#b6412f", size: 4, image: true },
     ],
   },
   {
@@ -163,6 +166,7 @@ const THEMES = [
     hazards: [
       { id: "bones", color: "#7b4f24" },
       { id: "cactus-spike", color: "#8a5a2b" },
+      { id: "image", color: "#7b4f24", size: 4, image: true },
     ],
   },
 ];
@@ -203,11 +207,22 @@ function spawnBonus(snake, food, hazards, rng, theme) {
 
 function spawnHazard(snake, food, bonus, hazards, rng, theme) {
   const occupied = buildOccupied(snake, food, bonus, hazards);
-  const sizeOrder = rng() < 0.5 ? [2, 3] : [3, 2];
+  const hazardType = pickOne(theme.hazards, rng);
+  const sizeOrder = hazardType.size
+    ? [hazardType.size]
+    : rng() < 0.5
+      ? [2, 3]
+      : [3, 2];
   for (const size of sizeOrder) {
     const point = spawnAreaAtEmpty(occupied, rng, size);
     if (point) {
-      return { ...point, size, ttl: HAZARD_TTL, type: pickOne(theme.hazards, rng) };
+      return {
+        ...point,
+        size,
+        ttl: HAZARD_TTL,
+        type: hazardType,
+        flip: hazardType.image ? rng() < 0.5 : false,
+      };
     }
   }
   return null;
@@ -375,6 +390,8 @@ const highscoreForm = document.getElementById("highscoreForm");
 const highscoreInput = document.getElementById("highScoreInput");
 const highscoreSkip = document.getElementById("highScoreSkip");
 const leaderboardList = document.getElementById("leaderboardList");
+const hazardImage = new Image();
+hazardImage.src = HAZARD_IMAGE_SRC;
 
 let cellSize = 20;
 let currentTheme = THEMES[0];
@@ -797,6 +814,10 @@ function drawStar(point, color) {
 
 function drawHazard(hazard) {
   const id = hazard.type?.id || "spikes";
+  if (id === "image") {
+    drawHazardImage(hazard);
+    return;
+  }
   if (id.includes("rock") || id.includes("bones")) {
     drawRock(hazard);
   } else {
@@ -864,6 +885,26 @@ function isPointInHazard(point, hazard) {
     point.y >= hazard.y &&
     point.y < hazard.y + size
   );
+}
+
+function drawHazardImage(hazard) {
+  if (!hazardImage.complete || hazardImage.naturalWidth === 0) {
+    drawRock(hazard);
+    return;
+  }
+  const size = hazard.size || 4;
+  const sizePx = size * cellSize;
+  const x = hazard.x * cellSize;
+  const y = hazard.y * cellSize;
+  ctx.save();
+  if (hazard.flip) {
+    ctx.translate(x + sizePx, y);
+    ctx.scale(-1, 1);
+    ctx.drawImage(hazardImage, 0, 0, sizePx, sizePx);
+  } else {
+    ctx.drawImage(hazardImage, x, y, sizePx, sizePx);
+  }
+  ctx.restore();
 }
 
 function drawEyes(head, direction) {
