@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Snake</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="top">
+        <div>
+          <h1>Snake</h1>
+          <p class="sub">Classic grid snake. Eat food, grow, avoid walls.</p>
+          <p class="sub theme">Theme: <span id="themeName">Meadow</span></p>
+        </div>
+        <div class="score">
+          <span>Score</span>
+          <strong id="score">0</strong>
+        </div>
+      </header>
+
+      <section class="board">
+        <canvas id="game" width="400" height="400" aria-label="Snake game"></canvas>
+        <div class="overlay" id="overlay" aria-live="polite"></div>
+      </section>
+
+      <section class="controls">
+        <div class="control-row">
+          <button class="btn" data-dir="up" aria-label="Up">▲</button>
+        </div>
+        <div class="control-row">
+          <button class="btn" data-dir="left" aria-label="Left">◀</button>
+          <button class="btn" data-action="pause" aria-label="Pause">Pause</button>
+          <button class="btn" data-dir="right" aria-label="Right">▶</button>
+        </div>
+        <div class="control-row">
+          <button class="btn" data-dir="down" aria-label="Down">▼</button>
+        </div>
+        <div class="control-row">
+          <button class="btn" data-action="restart" aria-label="Restart">Restart</button>
+        </div>
+      </section>
+
+      <footer class="help">
+        <span>Keys: arrows / WASD. Pause: Space. Restart: Enter.</span>
+      </footer>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>

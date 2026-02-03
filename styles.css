@@ -1,0 +1,196 @@
+:root {
+  color-scheme: light;
+  --bg: #ffe7b3;
+  --panel: #fff4d4;
+  --text: #2a241a;
+  --muted: #7c6a4d;
+  --accent: #3fbf5a;
+  --food: #ff6b6b;
+  --food-leaf: #4acb6b;
+  --food-stem: #6b4f2a;
+  --grid: #f1d8a8;
+  --canvas-bg: #f9f1c6;
+  --snake: #63d36d;
+  --snake-head: #56c95f;
+  --snake-stroke: #2f7a3c;
+  --eye-white: #ffffff;
+  --eye-pupil: #2a241a;
+  --panel-border: #e6c78d;
+  --panel-shadow: #e6c78d;
+  --button-border: #e3b861;
+  --button-shadow: #e3b861;
+  --button-bg: #fff2c7;
+  --overlay-bg: rgba(255, 247, 216, 0.78);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Chalkboard SE", "Comic Sans MS", "Marker Felt", "Trebuchet MS", sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+body[data-theme="meadow"] {
+  background-image:
+    radial-gradient(circle at top, #f7ffdc 0%, #e9f8c1 45%, #d4f0a0 100%),
+    repeating-linear-gradient(90deg, rgba(46, 135, 52, 0.08) 0 2px, rgba(46, 135, 52, 0) 2px 8px),
+    repeating-linear-gradient(0deg, rgba(46, 135, 52, 0.06) 0 3px, rgba(46, 135, 52, 0) 3px 10px);
+  background-size: auto, auto, auto;
+}
+
+body[data-theme="jungle"] {
+  background-image:
+    radial-gradient(circle at top, #2c5f40 0%, #1e4731 55%, #143322 100%),
+    radial-gradient(rgba(57, 124, 82, 0.32) 2px, transparent 0),
+    radial-gradient(rgba(28, 88, 56, 0.28) 2px, transparent 0);
+  background-size: auto, 36px 36px, 56px 56px;
+  background-position: 0 0, 0 0, 18px 18px;
+}
+
+body[data-theme="desert"] {
+  background-image:
+    radial-gradient(circle at top, #fff1c9 0%, #f5d59a 60%, #e6b874 100%),
+    radial-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 0),
+    radial-gradient(rgba(199, 159, 98, 0.2) 1px, transparent 0);
+  background-size: auto, 22px 22px, 42px 42px;
+  background-position: 0 0, 0 0, 11px 11px;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 40px;
+  display: grid;
+  gap: 20px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 36px;
+  letter-spacing: 0.4px;
+}
+
+.sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.score {
+  background: var(--panel);
+  padding: 10px 16px;
+  border-radius: 14px;
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  min-width: 90px;
+  border: 2px solid var(--panel-border);
+  box-shadow: 0 4px 0 var(--panel-shadow);
+}
+
+.score span {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.score strong {
+  font-size: 22px;
+}
+
+.board {
+  position: relative;
+  background: var(--panel);
+  border-radius: 20px;
+  padding: 16px;
+  border: 3px solid var(--panel-border);
+  box-shadow: 0 10px 0 var(--panel-shadow);
+}
+
+#game {
+  display: block;
+  width: min(85vmin, 520px);
+  height: min(85vmin, 520px);
+  margin: 0 auto;
+  background: var(--canvas-bg);
+  border-radius: 14px;
+  border: 3px solid var(--panel-border);
+  box-shadow: inset 0 0 0 2px var(--panel-shadow);
+}
+
+.overlay {
+  position: absolute;
+  inset: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  font-size: 20px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  background: var(--overlay-bg);
+  border-radius: 14px;
+  border: 2px dashed var(--panel-border);
+}
+
+.overlay.show {
+  opacity: 1;
+}
+
+.controls {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.control-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  border: 2px solid var(--button-border);
+  background: var(--button-bg);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 72px;
+  box-shadow: 0 3px 0 var(--button-shadow);
+}
+
+.btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--button-shadow);
+}
+
+.help {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.theme {
+  margin-top: 6px;
+}
+
+@media (min-width: 700px) {
+  .controls {
+    display: none;
+  }
+}
