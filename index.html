@@ -31,10 +31,14 @@
       </header>
 
       <section class="game-area">
-        <section class="board">
-          <canvas id="game" width="400" height="400" aria-label="Snake game"></canvas>
-          <div class="overlay" id="overlay" aria-live="polite"></div>
-          <div class="highscore-prompt" id="highscorePrompt">
+      <section class="board">
+        <canvas id="game" width="400" height="400" aria-label="Snake game"></canvas>
+        <div class="overlay" id="overlay" aria-live="polite">
+          <img id="overlayImage" alt="Game over" src="assets/gameover.png" />
+          <span id="overlayMessage"></span>
+          <button class="btn" id="overlayRestart" type="button">Restart</button>
+        </div>
+        <div class="highscore-prompt" id="highscorePrompt">
             <h2>Top 10 Score!</h2>
             <p>Enter your name to save it.</p>
             <form id="highscoreForm">

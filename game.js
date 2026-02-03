@@ -76,6 +76,150 @@ const THEMES = [
       { id: "image", color: "#c7e6ff", size: 4, image: true },
     ],
   },
+  {
+    id: "meadow",
+    name: "Meadow",
+    ui: {
+      "--bg": "#eef7b2",
+      "--panel": "#fff4d4",
+      "--text": "#2a241a",
+      "--muted": "#7c6a4d",
+      "--panel-border": "#e6c78d",
+      "--panel-shadow": "#e6c78d",
+      "--button-border": "#e3b861",
+      "--button-shadow": "#e3b861",
+      "--button-bg": "#fff2c7",
+      "--canvas-bg": "#f9f1c6",
+      "--overlay-bg": "rgba(255, 247, 216, 0.78)",
+    },
+    palette: {
+      canvas: "#f9f1c6",
+      grid: "#e5d2a3",
+      snake: "#f5a7c0",
+      snakeHead: "#f09ab7",
+      snakeStroke: "#b5677c",
+      food: "#ff7ac8",
+      foodLeaf: "#7bdff6",
+      foodStem: "#ffb3d9",
+      bonus: "#ffdf4d",
+      bonusStroke: "#c58a1a",
+      hazard: "#7cc0ff",
+      hazardStroke: "#3a7bb5",
+      eyeWhite: "#ffffff",
+      eyePupil: "#2a241a",
+    },
+    fruits: [
+      { id: "candy", color: "#ff7ac8" },
+      { id: "lollipop", color: "#ff6b9e" },
+      { id: "donut", color: "#ff9ad5" },
+      { id: "gummy", color: "#ff5ac1" },
+    ],
+    bonusItems: [
+      { id: "star", color: "#ffdf4d" },
+      { id: "gem", color: "#6ee7ff" },
+    ],
+    hazards: [
+      { id: "puddle", color: "#7cc0ff" },
+      { id: "flower", color: "#ff7ac8" },
+      { id: "image", color: "#7cc0ff", size: 4, image: true },
+    ],
+  },
+  {
+    id: "jungle",
+    name: "Jungle",
+    ui: {
+      "--bg": "#1d3a2a",
+      "--panel": "#1f3d2e",
+      "--text": "#f1f7ea",
+      "--muted": "#b8c8b1",
+      "--panel-border": "#2b5b41",
+      "--panel-shadow": "#173025",
+      "--button-border": "#2b5b41",
+      "--button-shadow": "#173025",
+      "--button-bg": "#244737",
+      "--canvas-bg": "#1d3a2a",
+      "--overlay-bg": "rgba(25, 44, 33, 0.78)",
+    },
+    palette: {
+      canvas: "#1d3a2a",
+      grid: "#2a4f3a",
+      snake: "#f5a7c0",
+      snakeHead: "#f09ab7",
+      snakeStroke: "#b5677c",
+      food: "#ff7ac8",
+      foodLeaf: "#7bdff6",
+      foodStem: "#ffb3d9",
+      bonus: "#ffd24a",
+      bonusStroke: "#b87812",
+      hazard: "#c57b39",
+      hazardStroke: "#6b3b12",
+      eyeWhite: "#f9f7ef",
+      eyePupil: "#1a1a1a",
+    },
+    fruits: [
+      { id: "candy", color: "#ff7ac8" },
+      { id: "lollipop", color: "#ff6b9e" },
+      { id: "donut", color: "#ff9ad5" },
+      { id: "gummy", color: "#ff5ac1" },
+    ],
+    bonusItems: [
+      { id: "star", color: "#ffd24a" },
+      { id: "gem", color: "#6ee7ff" },
+    ],
+    hazards: [
+      { id: "scorpion", color: "#c57b39" },
+      { id: "beetle", color: "#7b4a2b" },
+      { id: "image", color: "#c57b39", size: 4, image: true },
+    ],
+  },
+  {
+    id: "desert",
+    name: "Desert",
+    ui: {
+      "--bg": "#f5d59a",
+      "--panel": "#fff0cf",
+      "--text": "#5a3f21",
+      "--muted": "#8c6c46",
+      "--panel-border": "#e6c28b",
+      "--panel-shadow": "#d7b176",
+      "--button-border": "#e0b071",
+      "--button-shadow": "#c89458",
+      "--button-bg": "#ffe5b4",
+      "--canvas-bg": "#f4e2b9",
+      "--overlay-bg": "rgba(255, 244, 216, 0.82)",
+    },
+    palette: {
+      canvas: "#f4e2b9",
+      grid: "#e5c98e",
+      snake: "#f5a7c0",
+      snakeHead: "#f09ab7",
+      snakeStroke: "#b5677c",
+      food: "#ff7ac8",
+      foodLeaf: "#7bdff6",
+      foodStem: "#ffb3d9",
+      bonus: "#ffc93a",
+      bonusStroke: "#b87512",
+      hazard: "#6dbb5f",
+      hazardStroke: "#3b6f34",
+      eyeWhite: "#fff7ef",
+      eyePupil: "#3b2b1a",
+    },
+    fruits: [
+      { id: "candy", color: "#ff7ac8" },
+      { id: "lollipop", color: "#ff6b9e" },
+      { id: "donut", color: "#ff9ad5" },
+      { id: "gummy", color: "#ff5ac1" },
+    ],
+    bonusItems: [
+      { id: "star", color: "#ffc93a" },
+      { id: "gem", color: "#6ee7ff" },
+    ],
+    hazards: [
+      { id: "cactus", color: "#6dbb5f" },
+      { id: "cactus-small", color: "#4c9a47" },
+      { id: "image", color: "#6dbb5f", size: 4, image: true },
+    ],
+  },
 ];
 
 function createInitialState(rng = Math.random, theme = currentTheme) {
@@ -304,6 +448,9 @@ const scoreEl = document.getElementById("score");
 const highScoreValueEl = document.getElementById("highScoreValue");
 const highScoreNameEl = document.getElementById("highScoreName");
 const overlay = document.getElementById("overlay");
+const overlayRestart = document.getElementById("overlayRestart");
+const overlayMessage = document.getElementById("overlayMessage");
+const overlayImage = document.getElementById("overlayImage");
 const themeNameEl = document.getElementById("themeName");
 const highscorePrompt = document.getElementById("highscorePrompt");
 const highscoreForm = document.getElementById("highscoreForm");
@@ -372,7 +519,8 @@ function reset(options = {}) {
   awaitingName = false;
   highscorePrompt.classList.remove("show");
   overlay.classList.remove("show");
-  overlay.textContent = "";
+  overlayMessage.textContent = "";
+  setOverlayImageVisible(false);
   start();
   render();
 }
@@ -382,8 +530,10 @@ function togglePause() {
     return;
   }
   paused = !paused;
-  overlay.textContent = paused ? "Paused" : "";
+  overlayMessage.textContent = paused ? "Paused" : "";
   overlay.classList.toggle("show", paused);
+  setOverlayRestartVisible(false);
+  setOverlayImageVisible(false);
 }
 
 function render() {
@@ -429,16 +579,24 @@ function render() {
 
   if (state.status === "game-over") {
     if (!awaitingName) {
-      overlay.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
+      overlayMessage.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
       overlay.classList.add("show");
+      setOverlayRestartVisible(true);
+      setOverlayImageVisible(true);
     }
   }
 
   if (state.status === "won") {
     if (!awaitingName) {
-      overlay.textContent = `You win! Score ${state.score}. Press Enter to restart.`;
+      overlayMessage.textContent = `You win! Score ${state.score}. Press Enter to restart.`;
       overlay.classList.add("show");
+      setOverlayRestartVisible(true);
+      setOverlayImageVisible(false);
     }
+  }
+  if (state.status === "running") {
+    setOverlayRestartVisible(false);
+    setOverlayImageVisible(false);
   }
 }
 
@@ -820,6 +978,30 @@ function drawHazard(hazard) {
     drawHazardImage(hazard);
     return;
   }
+  if (id.includes("cloud")) {
+    drawCloud(hazard);
+    return;
+  }
+  if (id.includes("puddle")) {
+    drawPuddle(hazard);
+    return;
+  }
+  if (id.includes("flower")) {
+    drawFlower(hazard);
+    return;
+  }
+  if (id.includes("cactus")) {
+    drawCactusHazard(hazard);
+    return;
+  }
+  if (id.includes("scorpion")) {
+    drawScorpion(hazard);
+    return;
+  }
+  if (id.includes("beetle")) {
+    drawBeetle(hazard);
+    return;
+  }
   drawCloud(hazard);
 }
 
@@ -858,6 +1040,83 @@ function drawSpikes(point) {
   ctx.fill();
   ctx.strokeStyle = colors.hazardStroke;
   ctx.lineWidth = Math.max(1, sizePx * 0.05);
+  ctx.stroke();
+}
+
+function drawPuddle(hazard) {
+  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  ctx.beginPath();
+  ctx.ellipse(centerX, centerY + sizePx * 0.05, sizePx * 0.35, sizePx * 0.22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, sizePx * 0.04);
+  ctx.stroke();
+}
+
+function drawFlower(hazard) {
+  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  const petal = sizePx * 0.12;
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  const petals = [
+    { x: 0, y: -petal },
+    { x: petal, y: 0 },
+    { x: 0, y: petal },
+    { x: -petal, y: 0 },
+  ];
+  petals.forEach((p) => {
+    ctx.beginPath();
+    ctx.ellipse(centerX + p.x, centerY + p.y, petal, petal * 0.7, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.fillStyle = "#ffd166";
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, petal * 0.6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawCactusHazard(hazard) {
+  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  roundRect(centerX - sizePx * 0.12, centerY - sizePx * 0.28, sizePx * 0.24, sizePx * 0.56, sizePx * 0.1);
+  ctx.fill();
+  roundRect(centerX - sizePx * 0.28, centerY - sizePx * 0.08, sizePx * 0.16, sizePx * 0.22, sizePx * 0.08);
+  ctx.fill();
+  roundRect(centerX + sizePx * 0.12, centerY - sizePx * 0.12, sizePx * 0.16, sizePx * 0.22, sizePx * 0.08);
+  ctx.fill();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, sizePx * 0.04);
+  ctx.stroke();
+}
+
+function drawScorpion(hazard) {
+  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  ctx.beginPath();
+  ctx.ellipse(centerX, centerY, sizePx * 0.22, sizePx * 0.14, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(centerX + sizePx * 0.2, centerY - sizePx * 0.16, sizePx * 0.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, sizePx * 0.05);
+  ctx.beginPath();
+  ctx.moveTo(centerX - sizePx * 0.2, centerY + sizePx * 0.08);
+  ctx.lineTo(centerX - sizePx * 0.32, centerY + sizePx * 0.18);
+  ctx.stroke();
+}
+
+function drawBeetle(hazard) {
+  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  ctx.beginPath();
+  ctx.ellipse(centerX, centerY, sizePx * 0.2, sizePx * 0.16, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, sizePx * 0.05);
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - sizePx * 0.16);
+  ctx.lineTo(centerX, centerY + sizePx * 0.16);
   ctx.stroke();
 }
 
@@ -1038,6 +1297,12 @@ window.addEventListener("resize", () => {
   resizeCanvas();
   render();
 });
+overlayRestart.addEventListener("click", () => {
+  if (awaitingName) {
+    skipHighScore();
+  }
+  reset();
+});
 canvas.addEventListener("touchstart", handleTouchStart, { passive: true });
 canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
 canvas.addEventListener("touchend", handleTouchEnd, { passive: true });
@@ -1106,10 +1371,13 @@ function applyTheme(theme) {
 }
 
 function handleGameEnd() {
+  const isGameOver = state.status === "game-over";
+  setOverlayImageVisible(isGameOver);
   if (isTopScore(state.score)) {
     awaitingName = true;
-    overlay.textContent = "Top 10 score!";
+    overlayMessage.textContent = "Top 10 score!";
     overlay.classList.add("show");
+    setOverlayRestartVisible(false);
     highscorePrompt.classList.add("show");
     highscoreInput.value = "";
     highscoreInput.focus();
@@ -1124,8 +1392,10 @@ async function submitHighScore() {
   const name = highscoreInput.value.trim() || "Player";
   awaitingName = false;
   highscorePrompt.classList.remove("show");
-  overlay.textContent = "Saving score...";
+  overlayMessage.textContent = "Saving score...";
   overlay.classList.add("show");
+  setOverlayRestartVisible(false);
+  setOverlayImageVisible(state.status === "game-over");
 
   try {
     const scores = await saveGlobalScore(name, state.score);
@@ -1133,8 +1403,10 @@ async function submitHighScore() {
       highScores = scores;
       leaderboardMode = "global";
       updateHighScoreDisplay();
-      overlay.textContent = "Global score saved! Press Enter to restart.";
+      overlayMessage.textContent = "Global score saved! Press Enter to restart.";
       overlay.classList.add("show");
+      setOverlayRestartVisible(true);
+      setOverlayImageVisible(state.status === "game-over");
       return;
     }
   } catch (error) {
@@ -1144,16 +1416,20 @@ async function submitHighScore() {
   highScores = saveLocalHighScore(name, state.score);
   leaderboardMode = "local";
   updateHighScoreDisplay();
-  overlay.textContent = "Saved locally. Press Enter to restart.";
+  overlayMessage.textContent = "Saved locally. Press Enter to restart.";
   overlay.classList.add("show");
+  setOverlayRestartVisible(true);
+  setOverlayImageVisible(state.status === "game-over");
 }
 
 function skipHighScore() {
   if (!awaitingName) return;
   awaitingName = false;
   highscorePrompt.classList.remove("show");
-  overlay.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
+  overlayMessage.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
   overlay.classList.add("show");
+  setOverlayRestartVisible(true);
+  setOverlayImageVisible(true);
 }
 
 function loadLocalHighScores() {
@@ -1230,6 +1506,16 @@ function isTypingTarget(target) {
   if (!target) return false;
   const tag = target.tagName;
   return tag === "INPUT" || tag === "TEXTAREA";
+}
+
+function setOverlayRestartVisible(visible) {
+  if (!overlayRestart) return;
+  overlayRestart.style.display = visible ? "inline-flex" : "none";
+}
+
+function setOverlayImageVisible(visible) {
+  if (!overlayImage) return;
+  overlayImage.classList.toggle("show", visible);
 }
 
 function handleTouchStart(event) {
