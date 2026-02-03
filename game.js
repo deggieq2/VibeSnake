@@ -9,6 +9,8 @@ const HAZARD_SPAWN_CHANCE = 0.05;
 const MAX_HAZARDS = 3;
 const HIGH_SCORE_KEY = "vibesnake_highscores";
 const MAX_HIGH_SCORES = 10;
+const GLOBAL_LEADERBOARD_URL = "https://vibesnake-leaderboard.deggieq2.workers.dev/api/leaderboard";
+const LOCAL_DEV_LEADERBOARD_URL = "http://localhost:8787/api/leaderboard";
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -377,7 +379,8 @@ const leaderboardList = document.getElementById("leaderboardList");
 let cellSize = 20;
 let currentTheme = THEMES[0];
 let colors = { ...currentTheme.palette };
-let highScores = loadHighScores();
+let highScores = loadLocalHighScores();
+let leaderboardMode = "local";
 
 let state = createInitialState(Math.random, currentTheme);
 let directionQueue = [];
@@ -948,7 +951,7 @@ function handleKey(event) {
   if (key === " ") togglePause();
   if (key === "enter") {
     if (awaitingName) {
-      submitHighScore();
+      void submitHighScore();
     } else {
       reset();
     }
@@ -977,7 +980,7 @@ window.addEventListener("resize", () => {
 });
 highscoreForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  submitHighScore();
+  void submitHighScore();
 });
 highscoreSkip.addEventListener("click", () => {
   skipHighScore();
@@ -994,6 +997,7 @@ document.querySelectorAll("button[data-dir], button[data-action]").forEach((btn)
 applyTheme(pickRandomTheme());
 resizeCanvas();
 reset({ keepTheme: true });
+void refreshGlobalLeaderboard();
 
 // Expose pure logic for potential tests.
 window.__snake = {
@@ -1052,14 +1056,32 @@ function handleGameEnd() {
   }
 }
 
-function submitHighScore() {
+async function submitHighScore() {
   if (!awaitingName) return;
   const name = highscoreInput.value.trim() || "Player";
-  highScores = saveHighScore(name, state.score);
-  updateHighScoreDisplay();
   awaitingName = false;
   highscorePrompt.classList.remove("show");
-  overlay.textContent = "High score saved! Press Enter to restart.";
+  overlay.textContent = "Saving score...";
+  overlay.classList.add("show");
+
+  try {
+    const scores = await saveGlobalScore(name, state.score);
+    if (scores) {
+      highScores = scores;
+      leaderboardMode = "global";
+      updateHighScoreDisplay();
+      overlay.textContent = "Global score saved! Press Enter to restart.";
+      overlay.classList.add("show");
+      return;
+    }
+  } catch (error) {
+    // Fall back to local if global fails.
+  }
+
+  highScores = saveLocalHighScore(name, state.score);
+  leaderboardMode = "local";
+  updateHighScoreDisplay();
+  overlay.textContent = "Saved locally. Press Enter to restart.";
   overlay.classList.add("show");
 }
 
@@ -1071,7 +1093,7 @@ function skipHighScore() {
   overlay.classList.add("show");
 }
 
-function loadHighScores() {
+function loadLocalHighScores() {
   try {
     const stored = JSON.parse(localStorage.getItem(HIGH_SCORE_KEY));
     if (Array.isArray(stored)) {
@@ -1098,7 +1120,7 @@ function loadHighScores() {
   return [];
 }
 
-function saveHighScore(name, score) {
+function saveLocalHighScore(name, score) {
   const record = { name, score };
   const next = [...highScores, record].sort((a, b) => b.score - a.score).slice(0, MAX_HIGH_SCORES);
   localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(next));
@@ -1145,6 +1167,56 @@ function isTypingTarget(target) {
   if (!target) return false;
   const tag = target.tagName;
   return tag === "INPUT" || tag === "TEXTAREA";
+}
+
+function getLeaderboardUrl() {
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return LOCAL_DEV_LEADERBOARD_URL;
+  }
+  return GLOBAL_LEADERBOARD_URL;
+}
+
+async function refreshGlobalLeaderboard() {
+  const url = getLeaderboardUrl();
+  try {
+    const response = await fetch(url, { method: "GET" });
+    if (!response.ok) {
+      throw new Error("Failed to fetch leaderboard.");
+    }
+    const data = await response.json();
+    const normalized = normalizeScores(data?.scores);
+    highScores = normalized;
+    leaderboardMode = "global";
+    updateHighScoreDisplay();
+  } catch (error) {
+    leaderboardMode = "local";
+  }
+}
+
+async function saveGlobalScore(name, score) {
+  const url = getLeaderboardUrl();
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, score }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to save global score.");
+  }
+  const data = await response.json();
+  return normalizeScores(data?.scores);
+}
+
+function normalizeScores(scores) {
+  if (!Array.isArray(scores)) return [];
+  return scores
+    .filter((entry) => entry && typeof entry.score === "number")
+    .map((entry) => ({
+      name: entry.name ? String(entry.name) : "Player",
+      score: entry.score,
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, MAX_HIGH_SCORES);
 }
 
 updateHighScoreDisplay();
