@@ -9,7 +9,7 @@ const HAZARD_SPAWN_CHANCE = 0.05;
 const MAX_HAZARDS = 3;
 const HIGH_SCORE_KEY = "vibesnake_highscores";
 const MAX_HIGH_SCORES = 10;
-const GLOBAL_LEADERBOARD_URL = "https://vibesnake-leaderboard.deggieq2.workers.dev/api/leaderboard";
+const GLOBAL_LEADERBOARD_URL = "https://vibesnake-leaderboard.daryl-e86.workers.dev/api/leaderboard";
 const LOCAL_DEV_LEADERBOARD_URL = "http://localhost:8787/api/leaderboard";
 
 const DIRECTIONS = {

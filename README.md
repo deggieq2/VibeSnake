@@ -59,6 +59,6 @@ wrangler deploy
 ```
 
 ### Notes
-- The Worker serves `https://vibesnake-leaderboard.deggieq2.workers.dev/api/leaderboard`.
+- The Worker serves `https://vibesnake-leaderboard.daryl-e86.workers.dev/api/leaderboard`.
 - Local dev: run `wrangler dev` from `worker/` and the game will use `http://localhost:8787/api/leaderboard`.
 - The game falls back to local scores if the global API is unavailable.
