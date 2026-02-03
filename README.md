@@ -1,3 +1,5 @@
+![VibeSnake banner](assets/banner.svg)
+
 # VibeSnake
 
 Classic Snake with themed environments, bonus items, and hazards.
@@ -30,4 +32,4 @@ A Pages workflow is included. After the first push, enable Pages in the repo set
 - Settings → Pages → Build and deployment → Source: GitHub Actions
 
 Your site will be available at:
-`https://deggieq2.github.io/VibeSnake/`
+`https://deggie.tech/`
