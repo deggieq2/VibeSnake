@@ -90,6 +90,7 @@ function createInitialState(rng = Math.random, theme = currentTheme) {
     food: null,
     bonus: null,
     hazards: [],
+    grow: 0,
     score: 0,
     status: "running",
   };
@@ -211,6 +212,7 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
 
   const willEat = state.food && newHead.x === state.food.x && newHead.y === state.food.y;
   const hitsBonus = state.bonus && newHead.x === state.bonus.x && newHead.y === state.bonus.y;
+  const bonusType = hitsBonus ? state.bonus?.type?.id : null;
   const hitsHazard = state.hazards.some((hazard) => isPointInHazard(newHead, hazard));
   const bodyToCheck = willEat ? state.snake : state.snake.slice(0, -1);
   if (bodyToCheck.some((part) => part.x === newHead.x && part.y === newHead.y)) {
@@ -221,7 +223,17 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
   }
 
   const newSnake = [newHead, ...state.snake];
-  if (!willEat) {
+  let growBy = 0;
+  if (willEat) {
+    growBy += 1;
+  }
+  if (hitsBonus && bonusType === "coin") {
+    growBy += 1;
+  }
+  let nextGrow = state.grow + growBy;
+  if (nextGrow > 0) {
+    nextGrow -= 1;
+  } else {
     newSnake.pop();
   }
 
@@ -271,6 +283,7 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
     food: nextFood,
     bonus: nextBonus,
     hazards: nextHazards,
+    grow: nextGrow,
     score: nextScore,
     status,
   };
@@ -299,6 +312,12 @@ const highscoreSkip = document.getElementById("highScoreSkip");
 const leaderboardList = document.getElementById("leaderboardList");
 const hazardImage = new Image();
 hazardImage.src = HAZARD_IMAGE_SRC;
+const touchState = {
+  active: false,
+  startX: 0,
+  startY: 0,
+  lastDir: null,
+};
 
 let cellSize = 20;
 let currentTheme = THEMES[0];
@@ -1019,6 +1038,9 @@ window.addEventListener("resize", () => {
   resizeCanvas();
   render();
 });
+canvas.addEventListener("touchstart", handleTouchStart, { passive: true });
+canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+canvas.addEventListener("touchend", handleTouchEnd, { passive: true });
 highscoreForm.addEventListener("submit", (event) => {
   event.preventDefault();
   void submitHighScore();
@@ -1208,6 +1230,49 @@ function isTypingTarget(target) {
   if (!target) return false;
   const tag = target.tagName;
   return tag === "INPUT" || tag === "TEXTAREA";
+}
+
+function handleTouchStart(event) {
+  const touch = event.touches[0];
+  if (!touch) return;
+  touchState.active = true;
+  touchState.startX = touch.clientX;
+  touchState.startY = touch.clientY;
+  touchState.lastDir = null;
+}
+
+function handleTouchMove(event) {
+  if (!touchState.active) return;
+  if (event.cancelable) {
+    event.preventDefault();
+  }
+  const touch = event.touches[0];
+  if (!touch) return;
+  const dx = touch.clientX - touchState.startX;
+  const dy = touch.clientY - touchState.startY;
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+  const threshold = Math.max(18, cellSize * 0.4);
+  if (absX < threshold && absY < threshold) return;
+
+  let dir = null;
+  if (absX > absY) {
+    dir = dx > 0 ? "right" : "left";
+  } else {
+    dir = dy > 0 ? "down" : "up";
+  }
+
+  if (dir && dir !== touchState.lastDir) {
+    handleDirectionInput(dir);
+    touchState.lastDir = dir;
+    touchState.startX = touch.clientX;
+    touchState.startY = touch.clientY;
+  }
+}
+
+function handleTouchEnd() {
+  touchState.active = false;
+  touchState.lastDir = null;
 }
 
 function getLeaderboardUrl() {
