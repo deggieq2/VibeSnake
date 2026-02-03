@@ -934,6 +934,9 @@ function handleDirectionInput(dir) {
 
 function handleKey(event) {
   const key = event.key.toLowerCase();
+  if (awaitingName && isTypingTarget(event.target)) {
+    return;
+  }
   if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "w", "a", "s", "d"].includes(key)) {
     event.preventDefault();
   }
@@ -1136,6 +1139,12 @@ function isTopScore(score) {
   if (highScores.length < MAX_HIGH_SCORES) return score > 0;
   const lowest = highScores[highScores.length - 1]?.score ?? 0;
   return score > lowest;
+}
+
+function isTypingTarget(target) {
+  if (!target) return false;
+  const tag = target.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA";
 }
 
 updateHighScoreDisplay();
