@@ -30,7 +30,7 @@ const OPPOSITES = {
 const THEMES = [
   {
     id: "candy",
-    name: "Candy",
+    name: "One in the Pink",
     ui: {
       "--bg": "#ffd6f3",
       "--panel": "#ffe7f7",
@@ -74,6 +74,54 @@ const THEMES = [
       { id: "cloud", color: "#ffffff" },
       { id: "cloud-dark", color: "#f1f5ff" },
       { id: "image", color: "#c7e6ff", size: 4, image: true },
+    ],
+  },
+  {
+    id: "stink",
+    name: "One in the Stink",
+    ui: {
+      "--bg": "#6b4b3a",
+      "--panel": "#f5d9c6",
+      "--text": "#3a2318",
+      "--muted": "#7b5a4c",
+      "--panel-border": "#d8b59f",
+      "--panel-shadow": "#b88f78",
+      "--button-border": "#caa287",
+      "--button-shadow": "#9d725b",
+      "--button-bg": "#f1cbb3",
+      "--canvas-bg": "#e9c7b2",
+      "--overlay-bg": "rgba(245, 217, 198, 0.9)",
+    },
+    palette: {
+      canvas: "#e9c7b2",
+      grid: "#cfae98",
+      snake: "#f5a7c0",
+      snakeHead: "#f09ab7",
+      snakeStroke: "#b5677c",
+      food: "#ff7ac8",
+      foodLeaf: "#7bdff6",
+      foodStem: "#ffb3d9",
+      bonus: "#ffdf4d",
+      bonusStroke: "#d28a18",
+      hazard: "#6b4b3a",
+      hazardStroke: "#3a2318",
+      eyeWhite: "#ffffff",
+      eyePupil: "#3a2318",
+    },
+    fruits: [
+      { id: "candy", color: "#ff7ac8" },
+      { id: "lollipop", color: "#ff6b9e" },
+      { id: "donut", color: "#ff9ad5" },
+      { id: "gummy", color: "#ff5ac1" },
+    ],
+    bonusItems: [
+      { id: "star", color: "#ffdf4d" },
+      { id: "gem", color: "#6ee7ff" },
+    ],
+    hazards: [
+      { id: "cloud", color: "#ffffff" },
+      { id: "cloud-dark", color: "#f1f5ff" },
+      { id: "image", color: "#6b4b3a", size: 4, image: true },
     ],
   },
   {

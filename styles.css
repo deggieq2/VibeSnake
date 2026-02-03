@@ -44,6 +44,15 @@ body[data-theme="candy"] {
   background-position: 0 0, 0 0, 14px 14px;
 }
 
+body[data-theme="stink"] {
+  background-image:
+    radial-gradient(circle at top, #7a5a47 0%, #634436 55%, #4f362c 100%),
+    radial-gradient(rgba(255, 236, 220, 0.25) 2px, transparent 0),
+    radial-gradient(rgba(76, 54, 43, 0.35) 2px, transparent 0);
+  background-size: auto, 36px 36px, 54px 54px;
+  background-position: 0 0, 0 0, 18px 18px;
+}
+
 body[data-theme="meadow"] {
   background-image:
     radial-gradient(circle at top, #f7ffdc 0%, #e9f8c1 45%, #d4f0a0 100%),
