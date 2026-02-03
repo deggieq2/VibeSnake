@@ -7,6 +7,8 @@ const BONUS_SPAWN_CHANCE = 0.06;
 const HAZARD_TTL = 55;
 const HAZARD_SPAWN_CHANCE = 0.05;
 const MAX_HAZARDS = 3;
+const HIGH_SCORE_KEY = "vibesnake_highscores";
+const MAX_HIGH_SCORES = 10;
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -362,17 +364,26 @@ function isInside(point) {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
+const highScoreValueEl = document.getElementById("highScoreValue");
+const highScoreNameEl = document.getElementById("highScoreName");
 const overlay = document.getElementById("overlay");
 const themeNameEl = document.getElementById("themeName");
+const highscorePrompt = document.getElementById("highscorePrompt");
+const highscoreForm = document.getElementById("highscoreForm");
+const highscoreInput = document.getElementById("highScoreInput");
+const highscoreSkip = document.getElementById("highScoreSkip");
+const leaderboardList = document.getElementById("leaderboardList");
 
 let cellSize = 20;
 let currentTheme = THEMES[0];
 let colors = { ...currentTheme.palette };
+let highScores = loadHighScores();
 
 let state = createInitialState(Math.random, currentTheme);
 let directionQueue = [];
 let timer = null;
 let paused = false;
+let awaitingName = false;
 
 function start() {
   if (timer) {
@@ -385,9 +396,13 @@ function tick() {
   if (paused) {
     return;
   }
+  const prevStatus = state.status;
   const inputDirection = directionQueue.shift();
   state = step(state, inputDirection, Math.random, currentTheme);
   render();
+  if (prevStatus === "running" && state.status !== "running") {
+    handleGameEnd();
+  }
   if (state.status === "game-over" || state.status === "won") {
     stop();
   }
@@ -408,6 +423,8 @@ function reset(options = {}) {
   state = createInitialState(Math.random, currentTheme);
   directionQueue = [];
   paused = false;
+  awaitingName = false;
+  highscorePrompt.classList.remove("show");
   overlay.classList.remove("show");
   overlay.textContent = "";
   start();
@@ -465,13 +482,17 @@ function render() {
   scoreEl.textContent = String(state.score);
 
   if (state.status === "game-over") {
-    overlay.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
-    overlay.classList.add("show");
+    if (!awaitingName) {
+      overlay.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
+      overlay.classList.add("show");
+    }
   }
 
   if (state.status === "won") {
-    overlay.textContent = `You win! Score ${state.score}. Press Enter to restart.`;
-    overlay.classList.add("show");
+    if (!awaitingName) {
+      overlay.textContent = `You win! Score ${state.score}. Press Enter to restart.`;
+      overlay.classList.add("show");
+    }
   }
 }
 
@@ -922,7 +943,13 @@ function handleKey(event) {
   if (key === "arrowright" || key === "d") handleDirectionInput("right");
 
   if (key === " ") togglePause();
-  if (key === "enter") reset();
+  if (key === "enter") {
+    if (awaitingName) {
+      submitHighScore();
+    } else {
+      reset();
+    }
+  }
 }
 
 function handleButton(event) {
@@ -932,13 +959,25 @@ function handleButton(event) {
     handleDirectionInput(dir);
   }
   if (action === "pause") togglePause();
-  if (action === "restart") reset();
+  if (action === "restart") {
+    if (awaitingName) {
+      skipHighScore();
+    }
+    reset();
+  }
 }
 
 document.addEventListener("keydown", handleKey);
 window.addEventListener("resize", () => {
   resizeCanvas();
   render();
+});
+highscoreForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  submitHighScore();
+});
+highscoreSkip.addEventListener("click", () => {
+  skipHighScore();
 });
 
 document.querySelectorAll("button[data-dir], button[data-action]").forEach((btn) => {
@@ -995,3 +1034,108 @@ function applyTheme(theme) {
     themeNameEl.textContent = theme.name;
   }
 }
+
+function handleGameEnd() {
+  if (isTopScore(state.score)) {
+    awaitingName = true;
+    overlay.textContent = "Top 10 score!";
+    overlay.classList.add("show");
+    highscorePrompt.classList.add("show");
+    highscoreInput.value = "";
+    highscoreInput.focus();
+  } else {
+    awaitingName = false;
+    highscorePrompt.classList.remove("show");
+  }
+}
+
+function submitHighScore() {
+  if (!awaitingName) return;
+  const name = highscoreInput.value.trim() || "Player";
+  highScores = saveHighScore(name, state.score);
+  updateHighScoreDisplay();
+  awaitingName = false;
+  highscorePrompt.classList.remove("show");
+  overlay.textContent = "High score saved! Press Enter to restart.";
+  overlay.classList.add("show");
+}
+
+function skipHighScore() {
+  if (!awaitingName) return;
+  awaitingName = false;
+  highscorePrompt.classList.remove("show");
+  overlay.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
+  overlay.classList.add("show");
+}
+
+function loadHighScores() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(HIGH_SCORE_KEY));
+    if (Array.isArray(stored)) {
+      return stored
+        .filter((entry) => entry && typeof entry.score === "number")
+        .map((entry) => ({
+          name: entry.name ? String(entry.name) : "Player",
+          score: entry.score,
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, MAX_HIGH_SCORES);
+    }
+    if (stored && typeof stored.score === "number") {
+      return [
+        {
+          name: stored.name ? String(stored.name) : "Player",
+          score: stored.score,
+        },
+      ];
+    }
+  } catch (error) {
+    return [];
+  }
+  return [];
+}
+
+function saveHighScore(name, score) {
+  const record = { name, score };
+  const next = [...highScores, record].sort((a, b) => b.score - a.score).slice(0, MAX_HIGH_SCORES);
+  localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(next));
+  return next;
+}
+
+function updateHighScoreDisplay() {
+  const top = highScores[0] || { name: "---", score: 0 };
+  highScoreValueEl.textContent = String(top.score);
+  highScoreNameEl.textContent = top.name || "---";
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  if (!leaderboardList) return;
+  leaderboardList.innerHTML = "";
+  if (highScores.length === 0) {
+    const empty = document.createElement("li");
+    empty.textContent = "No scores yet.";
+    leaderboardList.appendChild(empty);
+    return;
+  }
+  highScores.forEach((entry) => {
+    const row = document.createElement("li");
+    const name = document.createElement("span");
+    name.className = "name";
+    name.textContent = entry.name;
+    const score = document.createElement("span");
+    score.className = "score score-badge";
+    score.textContent = String(entry.score);
+    row.appendChild(name);
+    row.appendChild(score);
+    leaderboardList.appendChild(row);
+  });
+}
+
+function isTopScore(score) {
+  if (highScores.length < MAX_HIGH_SCORES) return score > 0;
+  const lowest = highScores[highScores.length - 1]?.score ?? 0;
+  return score > lowest;
+}
+
+updateHighScoreDisplay();

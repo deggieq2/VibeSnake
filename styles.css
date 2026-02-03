@@ -76,6 +76,12 @@ body[data-theme="desert"] {
   gap: 16px;
 }
 
+.scores {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
 h1 {
   margin: 0 0 6px;
   font-size: 36px;
@@ -98,6 +104,12 @@ h1 {
   min-width: 90px;
   border: 2px solid var(--panel-border);
   box-shadow: 0 4px 0 var(--panel-shadow);
+}
+
+.score em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .score span {
@@ -147,6 +159,54 @@ h1 {
   border: 2px dashed var(--panel-border);
 }
 
+.highscore-prompt {
+  position: absolute;
+  inset: 24px;
+  background: var(--overlay-bg);
+  border-radius: 16px;
+  border: 2px solid var(--panel-border);
+  display: none;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.highscore-prompt.show {
+  display: grid;
+}
+
+.highscore-prompt h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.highscore-prompt p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.highscore-prompt input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--panel-border);
+  font-size: 14px;
+  font-family: inherit;
+  min-width: min(240px, 70vw);
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.btn.ghost {
+  background: transparent;
+}
+
 .overlay.show {
   opacity: 1;
 }
@@ -183,6 +243,53 @@ h1 {
   color: var(--muted);
   font-size: 12px;
   text-align: center;
+}
+
+.leaderboard {
+  background: var(--panel);
+  border-radius: 16px;
+  border: 2px solid var(--panel-border);
+  box-shadow: 0 6px 0 var(--panel-shadow);
+  padding: 12px 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.leaderboard h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.leaderboard ol {
+  margin: 0;
+  padding-left: 22px;
+  display: grid;
+  gap: 6px;
+  color: var(--text);
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.leaderboard .name {
+  font-weight: 600;
+}
+
+.leaderboard .score {
+  font-weight: 700;
+}
+
+.leaderboard .score-badge {
+  background: var(--button-bg);
+  border: 2px solid var(--button-border);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
 }
 
 .theme {

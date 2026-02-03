@@ -14,15 +14,46 @@
           <p class="sub">Classic grid snake. Eat food, grow, avoid walls.</p>
           <p class="sub theme">Theme: <span id="themeName">Meadow</span></p>
         </div>
-        <div class="score">
-          <span>Score</span>
-          <strong id="score">0</strong>
+        <div class="scores">
+          <div class="score">
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div class="score">
+            <span>Top Score</span>
+            <strong id="highScoreValue">0</strong>
+            <em id="highScoreName">---</em>
+          </div>
         </div>
       </header>
+
+      <section class="leaderboard">
+        <h2>Top 10</h2>
+        <ol id="leaderboardList" aria-live="polite"></ol>
+      </section>
 
       <section class="board">
         <canvas id="game" width="400" height="400" aria-label="Snake game"></canvas>
         <div class="overlay" id="overlay" aria-live="polite"></div>
+        <div class="highscore-prompt" id="highscorePrompt">
+          <h2>Top 10 Score!</h2>
+          <p>Enter your name to save it.</p>
+          <form id="highscoreForm">
+            <input
+              id="highScoreInput"
+              type="text"
+              maxlength="12"
+              autocomplete="nickname"
+              placeholder="Your name"
+              aria-label="High score name"
+              required
+            />
+            <div class="prompt-actions">
+              <button class="btn" type="submit">Save</button>
+              <button class="btn ghost" type="button" id="highScoreSkip">Skip</button>
+            </div>
+          </form>
+        </div>
       </section>
 
       <section class="controls">
