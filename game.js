@@ -71,9 +71,27 @@ const THEMES = [
       { id: "gem", color: "#6ee7ff" },
     ],
     hazards: [
-      { id: "cloud", color: "#ffffff" },
-      { id: "cloud-dark", color: "#f1f5ff" },
-      { id: "image", color: "#c7e6ff", size: 4, image: true },
+      {
+        id: "cloud",
+        color: "#ffffff",
+        sizeOptions: [
+          { w: 3, h: 2 },
+          { w: 4, h: 3 },
+          { w: 2, h: 3 },
+          { w: 4, h: 2 },
+        ],
+      },
+      {
+        id: "cloud-dark",
+        color: "#f1f5ff",
+        sizeOptions: [
+          { w: 3, h: 2 },
+          { w: 4, h: 3 },
+          { w: 2, h: 3 },
+          { w: 4, h: 2 },
+        ],
+      },
+      { id: "image", color: "#c7e6ff", size: { w: 4, h: 4 }, image: true },
     ],
   },
   {
@@ -121,7 +139,15 @@ const THEMES = [
     hazards: [
       { id: "cloud", color: "#ffffff" },
       { id: "cloud-dark", color: "#f1f5ff" },
-      { id: "image", color: "#6b4b3a", size: 4, image: true },
+      {
+        id: "log",
+        color: "#6b4b3a",
+        sizeOptions: [
+          { w: 4, h: 2 },
+          { w: 3, h: 1 },
+        ],
+      },
+      { id: "image", color: "#6b4b3a", size: { w: 4, h: 4 }, image: true },
     ],
   },
   {
@@ -169,7 +195,7 @@ const THEMES = [
     hazards: [
       { id: "puddle", color: "#7cc0ff" },
       { id: "flower", color: "#ff7ac8" },
-      { id: "image", color: "#7cc0ff", size: 4, image: true },
+      { id: "image", color: "#7cc0ff", size: { w: 4, h: 4 }, image: true },
     ],
   },
   {
@@ -217,7 +243,7 @@ const THEMES = [
     hazards: [
       { id: "scorpion", color: "#c57b39" },
       { id: "beetle", color: "#7b4a2b" },
-      { id: "image", color: "#c57b39", size: 4, image: true },
+      { id: "image", color: "#c57b39", size: { w: 4, h: 4 }, image: true },
     ],
   },
   {
@@ -265,7 +291,7 @@ const THEMES = [
     hazards: [
       { id: "cactus", color: "#6dbb5f" },
       { id: "cactus-small", color: "#4c9a47" },
-      { id: "image", color: "#6dbb5f", size: 4, image: true },
+      { id: "image", color: "#6dbb5f", size: { w: 4, h: 4 }, image: true },
     ],
   },
 ];
@@ -308,17 +334,20 @@ function spawnBonus(snake, food, hazards, rng, theme) {
 function spawnHazard(snake, food, bonus, hazards, rng, theme) {
   const occupied = buildOccupied(snake, food, bonus, hazards);
   const hazardType = pickOne(theme.hazards, rng);
-  const sizeOrder = hazardType.size
-    ? [hazardType.size]
-    : rng() < 0.5
-      ? [2, 3]
-      : [3, 2];
-  for (const size of sizeOrder) {
-    const point = spawnAreaAtEmpty(occupied, rng, size);
+  const sizeOptions = hazardType.sizeOptions
+    ? [pickOne(hazardType.sizeOptions, rng)]
+    : hazardType.size
+      ? [hazardType.size]
+      : rng() < 0.5
+        ? [{ w: 2, h: 2 }, { w: 3, h: 3 }]
+        : [{ w: 3, h: 3 }, { w: 2, h: 2 }];
+  for (const size of sizeOptions) {
+    const dims = normalizeSize(size);
+    const point = spawnAreaAtEmpty(occupied, rng, dims.w, dims.h);
     if (point) {
       return {
         ...point,
-        size,
+        size: dims,
         ttl: HAZARD_TTL,
         type: hazardType,
         flip: hazardType.image ? rng() < 0.5 : false,
@@ -333,9 +362,9 @@ function buildOccupied(snake, food, bonus, hazards) {
   if (food) occupied.add(`${food.x},${food.y}`);
   if (bonus) occupied.add(`${bonus.x},${bonus.y}`);
   hazards.forEach((hazard) => {
-    const size = hazard.size || 1;
-    for (let dy = 0; dy < size; dy += 1) {
-      for (let dx = 0; dx < size; dx += 1) {
+    const { w, h } = normalizeSize(hazard.size || 1);
+    for (let dy = 0; dy < h; dy += 1) {
+      for (let dx = 0; dx < w; dx += 1) {
         occupied.add(`${hazard.x + dx},${hazard.y + dy}`);
       }
     }
@@ -360,13 +389,13 @@ function spawnAtEmpty(occupied, rng) {
   return empty[idx];
 }
 
-function spawnAreaAtEmpty(occupied, rng, size) {
+function spawnAreaAtEmpty(occupied, rng, width, height) {
   const empty = [];
-  for (let y = 0; y <= GRID_SIZE - size; y += 1) {
-    for (let x = 0; x <= GRID_SIZE - size; x += 1) {
+  for (let y = 0; y <= GRID_SIZE - height; y += 1) {
+    for (let x = 0; x <= GRID_SIZE - width; x += 1) {
       let open = true;
-      for (let dy = 0; dy < size && open; dy += 1) {
-        for (let dx = 0; dx < size; dx += 1) {
+      for (let dy = 0; dy < height && open; dy += 1) {
+        for (let dx = 0; dx < width; dx += 1) {
           if (occupied.has(`${x + dx},${y + dy}`)) {
             open = false;
             break;
@@ -383,6 +412,16 @@ function spawnAreaAtEmpty(occupied, rng, size) {
 
 function pickOne(list, rng) {
   return list[Math.floor(rng() * list.length)];
+}
+
+function normalizeSize(size) {
+  if (typeof size === "number") {
+    return { w: size, h: size };
+  }
+  if (size && typeof size.w === "number" && typeof size.h === "number") {
+    return { w: size.w, h: size.h };
+  }
+  return { w: 1, h: 1 };
 }
 
 function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
@@ -1050,6 +1089,10 @@ function drawHazard(hazard) {
     drawBeetle(hazard);
     return;
   }
+  if (id.includes("log")) {
+    drawLog(hazard);
+    return;
+  }
   drawCloud(hazard);
 }
 
@@ -1092,10 +1135,10 @@ function drawSpikes(point) {
 }
 
 function drawPuddle(hazard) {
-  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  const { centerX, centerY, widthPx, heightPx, sizePx } = hazardMetrics(hazard);
   ctx.fillStyle = hazard.type?.color || colors.hazard;
   ctx.beginPath();
-  ctx.ellipse(centerX, centerY + sizePx * 0.05, sizePx * 0.35, sizePx * 0.22, 0, 0, Math.PI * 2);
+  ctx.ellipse(centerX, centerY + sizePx * 0.05, widthPx * 0.35, heightPx * 0.22, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = colors.hazardStroke;
   ctx.lineWidth = Math.max(1, sizePx * 0.04);
@@ -1168,25 +1211,47 @@ function drawBeetle(hazard) {
   ctx.stroke();
 }
 
+function drawLog(hazard) {
+  const { centerX, centerY, widthPx, heightPx } = hazardMetrics(hazard);
+  const w = widthPx * 0.8;
+  const h = heightPx * 0.5;
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  roundRect(centerX - w / 2, centerY - h / 2, w, h, h * 0.4);
+  ctx.fill();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, h * 0.2);
+  ctx.stroke();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, h * 0.12);
+  ctx.beginPath();
+  ctx.moveTo(centerX - w * 0.25, centerY - h * 0.2);
+  ctx.lineTo(centerX - w * 0.25, centerY + h * 0.2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(centerX + w * 0.15, centerY - h * 0.2);
+  ctx.lineTo(centerX + w * 0.15, centerY + h * 0.2);
+  ctx.stroke();
+}
+
 function drawCloud(hazard) {
-  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
-  const r = sizePx * 0.18;
+  const { centerX, centerY, widthPx, heightPx, sizePx } = hazardMetrics(hazard);
+  const r = Math.min(widthPx, heightPx) * 0.18;
   ctx.fillStyle = hazard.type?.color || colors.hazard;
   const offsets = [
-    { x: -r * 1.4, y: 0 },
-    { x: -r * 0.4, y: -r * 0.8 },
-    { x: r * 0.5, y: -r * 0.4 },
-    { x: r * 1.3, y: 0 },
+    { x: -r * 1.6, y: 0 },
+    { x: -r * 0.6, y: -r * 0.8 },
+    { x: r * 0.7, y: -r * 0.4 },
+    { x: r * 1.6, y: 0 },
   ];
   offsets.forEach((o) => {
     ctx.beginPath();
     ctx.arc(centerX + o.x, centerY + o.y, r, 0, Math.PI * 2);
     ctx.fill();
   });
-  ctx.fillRect(centerX - r * 1.8, centerY, r * 3.6, r * 1.2);
+  ctx.fillRect(centerX - r * 2, centerY, r * 4, r * 1.3);
   ctx.strokeStyle = colors.hazardStroke;
   ctx.lineWidth = Math.max(1, sizePx * 0.04);
-  ctx.strokeRect(centerX - r * 1.8, centerY - r * 0.2, r * 3.6, r * 1.4);
+  ctx.strokeRect(centerX - r * 2, centerY - r * 0.2, r * 4, r * 1.5);
 }
 
 function fruitMetrics(point, scale) {
@@ -1196,20 +1261,22 @@ function fruitMetrics(point, scale) {
 }
 
 function hazardMetrics(hazard) {
-  const size = hazard.size || 1;
-  const sizePx = size * cellSize;
-  const centerX = hazard.x * cellSize + sizePx / 2;
-  const centerY = hazard.y * cellSize + sizePx / 2;
-  return { centerX, centerY, sizePx };
+  const { w, h } = normalizeSize(hazard.size || 1);
+  const widthPx = w * cellSize;
+  const heightPx = h * cellSize;
+  const sizePx = Math.min(widthPx, heightPx);
+  const centerX = hazard.x * cellSize + widthPx / 2;
+  const centerY = hazard.y * cellSize + heightPx / 2;
+  return { centerX, centerY, sizePx, widthPx, heightPx };
 }
 
 function isPointInHazard(point, hazard) {
-  const size = hazard.size || 1;
+  const { w, h } = normalizeSize(hazard.size || 1);
   return (
     point.x >= hazard.x &&
-    point.x < hazard.x + size &&
+    point.x < hazard.x + w &&
     point.y >= hazard.y &&
-    point.y < hazard.y + size
+    point.y < hazard.y + h
   );
 }
 
@@ -1218,17 +1285,18 @@ function drawHazardImage(hazard) {
     drawRock(hazard);
     return;
   }
-  const size = hazard.size || 4;
-  const sizePx = size * cellSize;
+  const { w, h } = normalizeSize(hazard.size || 4);
+  const widthPx = w * cellSize;
+  const heightPx = h * cellSize;
   const x = hazard.x * cellSize;
   const y = hazard.y * cellSize;
   ctx.save();
   if (hazard.flip) {
-    ctx.translate(x + sizePx, y);
+    ctx.translate(x + widthPx, y);
     ctx.scale(-1, 1);
-    ctx.drawImage(hazardImage, 0, 0, sizePx, sizePx);
+    ctx.drawImage(hazardImage, 0, 0, widthPx, heightPx);
   } else {
-    ctx.drawImage(hazardImage, x, y, sizePx, sizePx);
+    ctx.drawImage(hazardImage, x, y, widthPx, heightPx);
   }
   ctx.restore();
 }
