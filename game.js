@@ -82,8 +82,8 @@ const THEMES = [
     ui: {
       "--bg": "#6b4b3a",
       "--panel": "#f5d9c6",
-      "--text": "#3a2318",
-      "--muted": "#7b5a4c",
+      "--text": "#2a160f",
+      "--muted": "#4a2c21",
       "--panel-border": "#d8b59f",
       "--panel-shadow": "#b88f78",
       "--button-border": "#caa287",
