@@ -1,5 +1,6 @@
 const ALLOWED_ORIGINS = [
   "https://deggie.tech",
+  "https://davesnake.deggie.tech",
   "https://deggieq2.github.io",
   "https://vibesnake-leaderboard.daryl-e86.workers.dev",
   "http://localhost:8000",
