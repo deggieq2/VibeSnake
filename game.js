@@ -1,7 +1,7 @@
 const GRID_SIZE = 20;
 const TICK_MS = 140;
 const MAX_QUEUE = 2;
-const BONUS_SCORE = 5;
+const BONUS_SCORE = 87;
 const BONUS_TTL = 35;
 const BONUS_SPAWN_CHANCE = 0.06;
 const HAZARD_TTL = 55;
@@ -522,11 +522,10 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
 
   const dirVector = DIRECTIONS[nextDirection];
   const head = state.snake[0];
-  const newHead = { x: head.x + dirVector.x, y: head.y + dirVector.y };
-
-  if (!isInside(newHead)) {
-    return { ...state, status: "game-over", direction: nextDirection };
-  }
+  const newHead = wrapPoint({
+    x: head.x + dirVector.x,
+    y: head.y + dirVector.y,
+  });
 
   const allHazards = getAllHazards(state);
   const willEat = state.food && newHead.x === state.food.x && newHead.y === state.food.y;
@@ -619,6 +618,12 @@ function isValidTurn(current, next) {
 
 function isInside(point) {
   return point.x >= 0 && point.x < GRID_SIZE && point.y >= 0 && point.y < GRID_SIZE;
+}
+
+function wrapPoint(point) {
+  const x = (point.x + GRID_SIZE) % GRID_SIZE;
+  const y = (point.y + GRID_SIZE) % GRID_SIZE;
+  return { x, y };
 }
 
 const canvas = document.getElementById("game");
