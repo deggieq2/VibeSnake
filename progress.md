@@ -11,3 +11,6 @@ Original prompt: Can you add after 30points a slow moving hazard.png 2x2 that mo
 - Removed Meadow and Desert themes from rotation (styles + theme list).
 - Updated spawns to bias hazards/bonus away from snake head.
 - Moving hazard now supports diagonal movement and random angle changes on bounce.
+- Added rare pipe theme (10%) with title swap and themed message.
+- Added pipe snake rendering, plumbing collectibles, valve/water hazards, and blue background.
+- Playwright run failed again with MachPortRendezvousServer permission error (sandbox issue).

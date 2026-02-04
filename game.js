@@ -34,6 +34,7 @@ const THEMES = [
   {
     id: "candy",
     name: "One in the Pink",
+    title: "Dave's Snake",
     ui: {
       "--bg": "#ffd6f3",
       "--panel": "#ffe7f7",
@@ -99,6 +100,7 @@ const THEMES = [
   {
     id: "stink",
     name: "One in the Stink",
+    title: "Dave's Snake",
     ui: {
       "--bg": "#6b4b3a",
       "--panel": "#f5d9c6",
@@ -147,6 +149,71 @@ const THEMES = [
         sizeOptions: [
           { w: 4, h: 2 },
           { w: 3, h: 1 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "pipe",
+    name: "Pipe Dreams",
+    title: "Dave's Pipe",
+    rarity: 0.1,
+    ui: {
+      "--bg": "#8fc2ff",
+      "--panel": "#e6f2ff",
+      "--text": "#163055",
+      "--muted": "#3f5f8a",
+      "--panel-border": "#9fc3ea",
+      "--panel-shadow": "#6f9bcf",
+      "--button-border": "#8eb5e4",
+      "--button-shadow": "#5e88bf",
+      "--button-bg": "#d6e9ff",
+      "--canvas-bg": "#d7ebff",
+      "--overlay-bg": "rgba(214, 233, 255, 0.95)",
+    },
+    palette: {
+      canvas: "#d7ebff",
+      grid: "#b7d4f4",
+      snake: "#c47b4a",
+      snakeHead: "#d08955",
+      snakeStroke: "#8a4f2c",
+      food: "#4aa3ff",
+      foodLeaf: "#8cd2ff",
+      foodStem: "#bde2ff",
+      bonus: "#ffd24a",
+      bonusStroke: "#c58a1a",
+      hazard: "#5a88b8",
+      hazardStroke: "#345a85",
+      eyeWhite: "#ffffff",
+      eyePupil: "#163055",
+    },
+    fruits: [
+      { id: "tap", color: "#4aa3ff" },
+      { id: "connector", color: "#6bb6ff" },
+      { id: "elbow", color: "#5aa8ff" },
+      { id: "coupling", color: "#7ac0ff" },
+    ],
+    bonusItems: [
+      { id: "star", color: "#ffd24a" },
+      { id: "gem", color: "#6ee7ff" },
+    ],
+    hazards: [
+      {
+        id: "valve",
+        color: "#5a88b8",
+        sizeOptions: [
+          { w: 2, h: 2 },
+          { w: 3, h: 3 },
+        ],
+      },
+      {
+        id: "water",
+        color: "#ffffff",
+        sizeOptions: [
+          { w: 2, h: 2 },
+          { w: 3, h: 2 },
+          { w: 4, h: 3 },
+          { w: 4, h: 4 },
         ],
       },
     ],
@@ -564,6 +631,7 @@ const overlayRestart = document.getElementById("overlayRestart");
 const overlayMessage = document.getElementById("overlayMessage");
 const overlayImage = document.getElementById("overlayImage");
 const themeNameEl = document.getElementById("themeName");
+const gameTitleEl = document.getElementById("gameTitle");
 const highscorePrompt = document.getElementById("highscorePrompt");
 const highscoreForm = document.getElementById("highscoreForm");
 const highscoreInput = document.getElementById("highScoreInput");
@@ -591,6 +659,7 @@ let paused = false;
 let awaitingName = false;
 let snakeAccumulator = 0;
 let movingHazardAccumulator = 0;
+let themeMessageTimer = null;
 
 function start() {
   if (timer) {
@@ -652,6 +721,10 @@ function reset(options = {}) {
   if (!keepTheme) {
     applyTheme(pickRandomTheme());
   }
+  if (themeMessageTimer) {
+    clearTimeout(themeMessageTimer);
+    themeMessageTimer = null;
+  }
   state = createInitialState(Math.random, currentTheme);
   directionQueue = [];
   paused = false;
@@ -709,10 +782,15 @@ function render() {
   }
 
   state.snake.forEach((segment, index) => {
-    const fill = index === 0 ? colors.snakeHead : colors.snake;
-    drawRoundedCell(segment, fill, colors.snakeStroke);
-    if (index === 0) {
-      drawEyes(segment, state.direction);
+    const isHead = index === 0;
+    if (currentTheme.id === "pipe") {
+      drawPipeSegment(segment, isHead, state.direction);
+    } else {
+      const fill = isHead ? colors.snakeHead : colors.snake;
+      drawRoundedCell(segment, fill, colors.snakeStroke);
+      if (isHead) {
+        drawEyes(segment, state.direction);
+      }
     }
   });
 
@@ -757,6 +835,34 @@ function drawRoundedCell(point, fill, stroke) {
   }
 }
 
+function drawPipeSegment(point, isHead, direction) {
+  const padding = Math.max(1, cellSize * 0.08);
+  const size = cellSize - padding * 2;
+  const x = point.x * cellSize + padding;
+  const y = point.y * cellSize + padding;
+  const radius = size * 0.35;
+
+  ctx.fillStyle = isHead ? colors.snakeHead : colors.snake;
+  roundRect(x, y, size, size, radius);
+  ctx.fill();
+
+  ctx.strokeStyle = colors.snakeStroke;
+  ctx.lineWidth = Math.max(1, cellSize * 0.1);
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(255, 220, 190, 0.6)";
+  ctx.lineWidth = Math.max(1, cellSize * 0.06);
+  ctx.beginPath();
+  if (direction === "left" || direction === "right") {
+    ctx.moveTo(x + size * 0.2, y + size * 0.35);
+    ctx.lineTo(x + size * 0.8, y + size * 0.35);
+  } else {
+    ctx.moveTo(x + size * 0.35, y + size * 0.2);
+    ctx.lineTo(x + size * 0.35, y + size * 0.8);
+  }
+  ctx.stroke();
+}
+
 function roundRect(x, y, w, h, r) {
   const radius = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
@@ -771,6 +877,18 @@ function roundRect(x, y, w, h, r) {
 function drawFood(point, fruit) {
   const type = fruit || { id: "apple", color: colors.food };
   switch (type.id) {
+    case "tap":
+      drawTap(point, type.color);
+      break;
+    case "connector":
+      drawConnector(point, type.color);
+      break;
+    case "elbow":
+      drawElbow(point, type.color);
+      break;
+    case "coupling":
+      drawCoupling(point, type.color);
+      break;
     case "candy":
       drawCandy(point, type.color);
       break;
@@ -1003,6 +1121,41 @@ function drawGummy(point, color) {
   ctx.fill();
 }
 
+function drawTap(point, color) {
+  const { centerX, centerY } = fruitMetrics(point, 0.28);
+  ctx.fillStyle = color;
+  roundRect(centerX - cellSize * 0.2, centerY - cellSize * 0.06, cellSize * 0.4, cellSize * 0.12, cellSize * 0.06);
+  ctx.fill();
+  roundRect(centerX - cellSize * 0.06, centerY - cellSize * 0.2, cellSize * 0.12, cellSize * 0.14, cellSize * 0.04);
+  ctx.fill();
+}
+
+function drawConnector(point, color) {
+  const { centerX, centerY } = fruitMetrics(point, 0.28);
+  ctx.fillStyle = color;
+  roundRect(centerX - cellSize * 0.18, centerY - cellSize * 0.08, cellSize * 0.36, cellSize * 0.16, cellSize * 0.08);
+  ctx.fill();
+}
+
+function drawElbow(point, color) {
+  const { centerX, centerY } = fruitMetrics(point, 0.28);
+  ctx.fillStyle = color;
+  roundRect(centerX - cellSize * 0.18, centerY - cellSize * 0.08, cellSize * 0.36, cellSize * 0.16, cellSize * 0.08);
+  ctx.fill();
+  roundRect(centerX + cellSize * 0.04, centerY - cellSize * 0.18, cellSize * 0.16, cellSize * 0.36, cellSize * 0.08);
+  ctx.fill();
+}
+
+function drawCoupling(point, color) {
+  const { centerX, centerY } = fruitMetrics(point, 0.28);
+  ctx.fillStyle = color;
+  roundRect(centerX - cellSize * 0.16, centerY - cellSize * 0.1, cellSize * 0.32, cellSize * 0.2, cellSize * 0.08);
+  ctx.fill();
+  ctx.strokeStyle = colors.bonusStroke;
+  ctx.lineWidth = Math.max(1, cellSize * 0.05);
+  ctx.stroke();
+}
+
 function drawBonus(point) {
   const type = point.type || { id: "star", color: colors.bonus };
   switch (type.id) {
@@ -1147,6 +1300,14 @@ function drawHazard(hazard) {
     drawLog(hazard);
     return;
   }
+  if (id.includes("valve")) {
+    drawValve(hazard);
+    return;
+  }
+  if (id.includes("water")) {
+    drawWaterPuddle(hazard);
+    return;
+  }
   drawCloud(hazard);
 }
 
@@ -1284,6 +1445,36 @@ function drawLog(hazard) {
   ctx.beginPath();
   ctx.moveTo(centerX + w * 0.15, centerY - h * 0.2);
   ctx.lineTo(centerX + w * 0.15, centerY + h * 0.2);
+  ctx.stroke();
+}
+
+function drawValve(hazard) {
+  const { centerX, centerY, sizePx } = hazardMetrics(hazard);
+  const r = sizePx * 0.18;
+  ctx.fillStyle = hazard.type?.color || colors.hazard;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, r * 1.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, sizePx * 0.06);
+  ctx.beginPath();
+  ctx.moveTo(centerX - r * 1.5, centerY);
+  ctx.lineTo(centerX + r * 1.5, centerY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - r * 1.5);
+  ctx.lineTo(centerX, centerY + r * 1.5);
+  ctx.stroke();
+}
+
+function drawWaterPuddle(hazard) {
+  const { centerX, centerY, widthPx, heightPx } = hazardMetrics(hazard);
+  ctx.fillStyle = hazard.type?.color || "#ffffff";
+  ctx.beginPath();
+  ctx.ellipse(centerX, centerY, widthPx * 0.35, heightPx * 0.25, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.hazardStroke;
+  ctx.lineWidth = Math.max(1, Math.min(widthPx, heightPx) * 0.04);
   ctx.stroke();
 }
 
@@ -1521,9 +1712,19 @@ function resizeCanvas() {
 
 function pickRandomTheme() {
   if (THEMES.length === 1) return THEMES[0];
-  let next = THEMES[Math.floor(Math.random() * THEMES.length)];
+  const rares = THEMES.filter((theme) => theme.rarity);
+  const normals = THEMES.filter((theme) => !theme.rarity);
+  let next = null;
+  if (rares.length > 0 && Math.random() < rares[0].rarity) {
+    next = rares[Math.floor(Math.random() * rares.length)];
+  } else {
+    next = normals[Math.floor(Math.random() * normals.length)];
+  }
   if (next.id === currentTheme.id) {
-    next = THEMES[(THEMES.indexOf(currentTheme) + 1) % THEMES.length];
+    const pool = next.rarity ? rares : normals;
+    if (pool.length > 1) {
+      next = pool[(pool.indexOf(next) + 1) % pool.length];
+    }
   }
   return next;
 }
@@ -1537,6 +1738,14 @@ function applyTheme(theme) {
   });
   if (themeNameEl) {
     themeNameEl.textContent = theme.name;
+  }
+  if (gameTitleEl) {
+    const titleText = theme.title || "Dave's Snake";
+    gameTitleEl.textContent = titleText;
+    document.title = titleText;
+  }
+  if (theme.id === "pipe") {
+    showThemeMessage("Help Dave lay some Pipe!");
   }
 }
 
@@ -1686,6 +1895,25 @@ function setOverlayRestartVisible(visible) {
 function setOverlayImageVisible(visible) {
   if (!overlayImage) return;
   overlayImage.classList.toggle("show", visible);
+}
+
+function showThemeMessage(message) {
+  if (!overlayMessage || state.status !== "running" || awaitingName) {
+    return;
+  }
+  overlayMessage.textContent = message;
+  overlay.classList.add("show");
+  setOverlayRestartVisible(false);
+  setOverlayImageVisible(false);
+  if (themeMessageTimer) {
+    clearTimeout(themeMessageTimer);
+  }
+  themeMessageTimer = setTimeout(() => {
+    if (state.status === "running" && !awaitingName) {
+      overlay.classList.remove("show");
+      overlayMessage.textContent = "";
+    }
+  }, 1800);
 }
 
 function renderGameToText() {
