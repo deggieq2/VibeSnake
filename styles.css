@@ -260,6 +260,15 @@ h1 {
   display: inline-flex;
 }
 
+#overlayStart {
+  pointer-events: auto;
+  display: none;
+}
+
+.overlay.show #overlayStart {
+  display: inline-flex;
+}
+
 .controls {
   display: grid;
   gap: 8px;

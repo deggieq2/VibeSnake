@@ -14,3 +14,4 @@ Original prompt: Can you add after 30points a slow moving hazard.png 2x2 that mo
 - Added rare pipe theme (10%) with title swap and themed message.
 - Added pipe snake rendering, plumbing collectibles, valve/water hazards, and blue background.
 - Playwright run failed again with MachPortRendezvousServer permission error (sandbox issue).
+- Pipe theme now shows a start overlay with message and Start button before gameplay begins.

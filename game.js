@@ -628,6 +628,7 @@ const highScoreValueEl = document.getElementById("highScoreValue");
 const highScoreNameEl = document.getElementById("highScoreName");
 const overlay = document.getElementById("overlay");
 const overlayRestart = document.getElementById("overlayRestart");
+const overlayStart = document.getElementById("overlayStart");
 const overlayMessage = document.getElementById("overlayMessage");
 const overlayImage = document.getElementById("overlayImage");
 const themeNameEl = document.getElementById("themeName");
@@ -660,6 +661,7 @@ let awaitingName = false;
 let snakeAccumulator = 0;
 let movingHazardAccumulator = 0;
 let themeMessageTimer = null;
+let pipeIntroActive = false;
 
 function start() {
   if (timer) {
@@ -731,10 +733,12 @@ function reset(options = {}) {
   snakeAccumulator = 0;
   movingHazardAccumulator = 0;
   awaitingName = false;
+  pipeIntroActive = false;
   highscorePrompt.classList.remove("show");
   overlay.classList.remove("show");
   overlayMessage.textContent = "";
   setOverlayImageVisible(false);
+  setOverlayStartVisible(false);
   start();
   render();
 }
@@ -743,11 +747,15 @@ function togglePause() {
   if (state.status !== "running") {
     return;
   }
+  if (pipeIntroActive) {
+    return;
+  }
   paused = !paused;
   overlayMessage.textContent = paused ? "Paused" : "";
   overlay.classList.toggle("show", paused);
   setOverlayRestartVisible(false);
   setOverlayImageVisible(false);
+  setOverlayStartVisible(false);
 }
 
 function render() {
@@ -802,6 +810,7 @@ function render() {
       overlay.classList.add("show");
       setOverlayRestartVisible(true);
       setOverlayImageVisible(true);
+      setOverlayStartVisible(false);
     }
   }
 
@@ -811,6 +820,7 @@ function render() {
       overlay.classList.add("show");
       setOverlayRestartVisible(true);
       setOverlayImageVisible(false);
+      setOverlayStartVisible(false);
     }
   }
   if (state.status === "running") {
@@ -1664,6 +1674,15 @@ overlayRestart.addEventListener("click", () => {
   }
   reset();
 });
+overlayStart.addEventListener("click", () => {
+  if (!pipeIntroActive) return;
+  pipeIntroActive = false;
+  paused = false;
+  overlay.classList.remove("show");
+  overlayMessage.textContent = "";
+  setOverlayStartVisible(false);
+  start();
+});
 canvas.addEventListener("touchstart", handleTouchStart, { passive: true });
 canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
 canvas.addEventListener("touchend", handleTouchEnd, { passive: true });
@@ -1745,7 +1764,7 @@ function applyTheme(theme) {
     document.title = titleText;
   }
   if (theme.id === "pipe") {
-    showThemeMessage("Help Dave lay some Pipe!");
+    showPipeIntro();
   }
 }
 
@@ -1892,9 +1911,24 @@ function setOverlayRestartVisible(visible) {
   overlayRestart.style.display = visible ? "inline-flex" : "none";
 }
 
+function setOverlayStartVisible(visible) {
+  if (!overlayStart) return;
+  overlayStart.style.display = visible ? "inline-flex" : "none";
+}
+
 function setOverlayImageVisible(visible) {
   if (!overlayImage) return;
   overlayImage.classList.toggle("show", visible);
+}
+
+function showPipeIntro() {
+  pipeIntroActive = true;
+  paused = true;
+  overlayMessage.textContent = "Help Dave lay some Pipe!";
+  overlay.classList.add("show");
+  setOverlayStartVisible(true);
+  setOverlayRestartVisible(false);
+  setOverlayImageVisible(false);
 }
 
 function showThemeMessage(message) {
