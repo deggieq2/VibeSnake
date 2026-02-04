@@ -53,14 +53,6 @@ body[data-theme="stink"] {
   background-position: 0 0, 0 0, 18px 18px;
 }
 
-body[data-theme="meadow"] {
-  background-image:
-    radial-gradient(circle at top, #f7ffdc 0%, #e9f8c1 45%, #d4f0a0 100%),
-    repeating-linear-gradient(90deg, rgba(46, 135, 52, 0.08) 0 2px, rgba(46, 135, 52, 0) 2px 8px),
-    repeating-linear-gradient(0deg, rgba(46, 135, 52, 0.06) 0 3px, rgba(46, 135, 52, 0) 3px 10px);
-  background-size: auto, auto, auto;
-}
-
 body[data-theme="jungle"] {
   background-image:
     radial-gradient(circle at top, #2c5f40 0%, #1e4731 55%, #143322 100%),
@@ -68,15 +60,6 @@ body[data-theme="jungle"] {
     radial-gradient(rgba(28, 88, 56, 0.28) 2px, transparent 0);
   background-size: auto, 36px 36px, 56px 56px;
   background-position: 0 0, 0 0, 18px 18px;
-}
-
-body[data-theme="desert"] {
-  background-image:
-    radial-gradient(circle at top, #fff1c9 0%, #f5d59a 60%, #e6b874 100%),
-    radial-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 0),
-    radial-gradient(rgba(199, 159, 98, 0.2) 1px, transparent 0);
-  background-size: auto, 22px 22px, 42px 42px;
-  background-position: 0 0, 0 0, 11px 11px;
 }
 
 .wrap {

@@ -5,8 +5,11 @@ const BONUS_SCORE = 5;
 const BONUS_TTL = 35;
 const BONUS_SPAWN_CHANCE = 0.06;
 const HAZARD_TTL = 55;
-const HAZARD_SPAWN_CHANCE = 0.05;
-const MAX_HAZARDS = 3;
+const HAZARD_SPAWN_CHANCE = 0.03;
+const MAX_HAZARDS = 2;
+const MOVING_HAZARD_START_SCORE = 30;
+const MOVING_HAZARD_BASE_MS = 900;
+const MOVING_HAZARD_MIN_MS = 220;
 const HIGH_SCORE_KEY = "vibesnake_highscores";
 const MAX_HIGH_SCORES = 10;
 const GLOBAL_LEADERBOARD_URL = "https://vibesnake-leaderboard.daryl-e86.workers.dev/api/leaderboard";
@@ -91,7 +94,6 @@ const THEMES = [
           { w: 4, h: 2 },
         ],
       },
-      { id: "image", color: "#c7e6ff", size: { w: 4, h: 4 }, image: true },
     ],
   },
   {
@@ -147,55 +149,6 @@ const THEMES = [
           { w: 3, h: 1 },
         ],
       },
-      { id: "image", color: "#6b4b3a", size: { w: 4, h: 4 }, image: true },
-    ],
-  },
-  {
-    id: "meadow",
-    name: "Meadow",
-    ui: {
-      "--bg": "#eef7b2",
-      "--panel": "#fff4d4",
-      "--text": "#2a241a",
-      "--muted": "#7c6a4d",
-      "--panel-border": "#e6c78d",
-      "--panel-shadow": "#e6c78d",
-      "--button-border": "#e3b861",
-      "--button-shadow": "#e3b861",
-      "--button-bg": "#fff2c7",
-      "--canvas-bg": "#f9f1c6",
-      "--overlay-bg": "rgba(255, 247, 216, 0.78)",
-    },
-    palette: {
-      canvas: "#f9f1c6",
-      grid: "#e5d2a3",
-      snake: "#f5a7c0",
-      snakeHead: "#f09ab7",
-      snakeStroke: "#b5677c",
-      food: "#ff7ac8",
-      foodLeaf: "#7bdff6",
-      foodStem: "#ffb3d9",
-      bonus: "#ffdf4d",
-      bonusStroke: "#c58a1a",
-      hazard: "#7cc0ff",
-      hazardStroke: "#3a7bb5",
-      eyeWhite: "#ffffff",
-      eyePupil: "#2a241a",
-    },
-    fruits: [
-      { id: "candy", color: "#ff7ac8" },
-      { id: "lollipop", color: "#ff6b9e" },
-      { id: "donut", color: "#ff9ad5" },
-      { id: "gummy", color: "#ff5ac1" },
-    ],
-    bonusItems: [
-      { id: "star", color: "#ffdf4d" },
-      { id: "gem", color: "#6ee7ff" },
-    ],
-    hazards: [
-      { id: "puddle", color: "#7cc0ff" },
-      { id: "flower", color: "#ff7ac8" },
-      { id: "image", color: "#7cc0ff", size: { w: 4, h: 4 }, image: true },
     ],
   },
   {
@@ -243,55 +196,6 @@ const THEMES = [
     hazards: [
       { id: "scorpion", color: "#c57b39" },
       { id: "beetle", color: "#7b4a2b" },
-      { id: "image", color: "#c57b39", size: { w: 4, h: 4 }, image: true },
-    ],
-  },
-  {
-    id: "desert",
-    name: "Desert",
-    ui: {
-      "--bg": "#f5d59a",
-      "--panel": "#fff0cf",
-      "--text": "#5a3f21",
-      "--muted": "#8c6c46",
-      "--panel-border": "#e6c28b",
-      "--panel-shadow": "#d7b176",
-      "--button-border": "#e0b071",
-      "--button-shadow": "#c89458",
-      "--button-bg": "#ffe5b4",
-      "--canvas-bg": "#f4e2b9",
-      "--overlay-bg": "rgba(255, 244, 216, 0.82)",
-    },
-    palette: {
-      canvas: "#f4e2b9",
-      grid: "#e5c98e",
-      snake: "#f5a7c0",
-      snakeHead: "#f09ab7",
-      snakeStroke: "#b5677c",
-      food: "#ff7ac8",
-      foodLeaf: "#7bdff6",
-      foodStem: "#ffb3d9",
-      bonus: "#ffc93a",
-      bonusStroke: "#b87512",
-      hazard: "#6dbb5f",
-      hazardStroke: "#3b6f34",
-      eyeWhite: "#fff7ef",
-      eyePupil: "#3b2b1a",
-    },
-    fruits: [
-      { id: "candy", color: "#ff7ac8" },
-      { id: "lollipop", color: "#ff6b9e" },
-      { id: "donut", color: "#ff9ad5" },
-      { id: "gummy", color: "#ff5ac1" },
-    ],
-    bonusItems: [
-      { id: "star", color: "#ffc93a" },
-      { id: "gem", color: "#6ee7ff" },
-    ],
-    hazards: [
-      { id: "cactus", color: "#6dbb5f" },
-      { id: "cactus-small", color: "#4c9a47" },
-      { id: "image", color: "#6dbb5f", size: { w: 4, h: 4 }, image: true },
     ],
   },
 ];
@@ -308,6 +212,7 @@ function createInitialState(rng = Math.random, theme = currentTheme) {
     food: null,
     bonus: null,
     hazards: [],
+    movingHazard: null,
     grow: 0,
     score: 0,
     status: "running",
@@ -424,6 +329,131 @@ function normalizeSize(size) {
   return { w: 1, h: 1 };
 }
 
+function isAreaClear(occupied, x, y, w, h) {
+  for (let dy = 0; dy < h; dy += 1) {
+    for (let dx = 0; dx < w; dx += 1) {
+      if (occupied.has(`${x + dx},${y + dy}`)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function randomDirection() {
+  const dirs = [
+    { dx: 1, dy: 0 },
+    { dx: -1, dy: 0 },
+    { dx: 0, dy: 1 },
+    { dx: 0, dy: -1 },
+  ];
+  return dirs[Math.floor(Math.random() * dirs.length)];
+}
+
+function getAllHazards(currentState) {
+  if (currentState.movingHazard) {
+    return [...currentState.hazards, currentState.movingHazard];
+  }
+  return currentState.hazards;
+}
+
+function getMovingHazardInterval(score) {
+  const adjusted = MOVING_HAZARD_BASE_MS - Math.max(0, score - MOVING_HAZARD_START_SCORE) * 8;
+  return Math.max(MOVING_HAZARD_MIN_MS, adjusted);
+}
+
+function ensureMovingHazard(currentState) {
+  if (currentState.score < MOVING_HAZARD_START_SCORE || currentState.movingHazard) {
+    return currentState;
+  }
+  const occupied = buildOccupied(
+    currentState.snake,
+    currentState.food,
+    currentState.bonus,
+    currentState.hazards
+  );
+  const point = spawnAreaAtEmpty(occupied, Math.random, 2, 2);
+  if (!point) return currentState;
+  return {
+    ...currentState,
+    movingHazard: {
+      x: point.x,
+      y: point.y,
+      size: { w: 2, h: 2 },
+      type: { id: "image", image: true },
+      dir: randomDirection(),
+      flip: Math.random() < 0.5,
+    },
+  };
+}
+
+function moveMovingHazard(currentState) {
+  if (!currentState.movingHazard) return currentState;
+  const hazard = currentState.movingHazard;
+  const { w, h } = normalizeSize(hazard.size || 2);
+  const occupied = buildOccupied(
+    currentState.snake,
+    currentState.food,
+    currentState.bonus,
+    currentState.hazards
+  );
+  let { dx, dy } = hazard.dir || { dx: 1, dy: 0 };
+  let nx = hazard.x + dx;
+  let ny = hazard.y + dy;
+  let bounced = false;
+
+  if (nx < 0 || nx + w > GRID_SIZE) {
+    dx *= -1;
+    bounced = true;
+  }
+  if (ny < 0 || ny + h > GRID_SIZE) {
+    dy *= -1;
+    bounced = true;
+  }
+  nx = hazard.x + dx;
+  ny = hazard.y + dy;
+
+  if (nx < 0 || ny < 0 || nx + w > GRID_SIZE || ny + h > GRID_SIZE) {
+    nx = hazard.x;
+    ny = hazard.y;
+  }
+
+  let moved = false;
+  if (isAreaClear(occupied, nx, ny, w, h)) {
+    moved = nx !== hazard.x || ny !== hazard.y;
+  } else {
+    if (!bounced) {
+      dx *= -1;
+      dy *= -1;
+    }
+    nx = hazard.x + dx;
+    ny = hazard.y + dy;
+    if (
+      nx >= 0 &&
+      ny >= 0 &&
+      nx + w <= GRID_SIZE &&
+      ny + h <= GRID_SIZE &&
+      isAreaClear(occupied, nx, ny, w, h)
+    ) {
+      moved = true;
+    } else {
+      nx = hazard.x;
+      ny = hazard.y;
+    }
+  }
+
+  return {
+    ...currentState,
+    movingHazard: {
+      ...hazard,
+      x: nx,
+      y: ny,
+      dir: { dx, dy },
+      flip: moved ? !hazard.flip : hazard.flip,
+    },
+  };
+}
+
 function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
   if (state.status !== "running") {
     return state;
@@ -441,10 +471,11 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
     return { ...state, status: "game-over", direction: nextDirection };
   }
 
+  const allHazards = getAllHazards(state);
   const willEat = state.food && newHead.x === state.food.x && newHead.y === state.food.y;
   const hitsBonus = state.bonus && newHead.x === state.bonus.x && newHead.y === state.bonus.y;
   const bonusType = hitsBonus ? state.bonus?.type?.id : null;
-  const hitsHazard = state.hazards.some((hazard) => isPointInHazard(newHead, hazard));
+  const hitsHazard = allHazards.some((hazard) => isPointInHazard(newHead, hazard));
   const bodyToCheck = willEat ? state.snake : state.snake.slice(0, -1);
   if (bodyToCheck.some((part) => part.x === newHead.x && part.y === newHead.y)) {
     return { ...state, status: "game-over", direction: nextDirection };
@@ -470,7 +501,7 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
 
   const remainingBonus = hitsBonus ? null : state.bonus;
   const nextFood = willEat
-    ? spawnFood(newSnake, rng, theme, remainingBonus, state.hazards)
+    ? spawnFood(newSnake, rng, theme, remainingBonus, allHazards)
     : state.food;
   const nextScore =
     state.score + (willEat ? 1 : 0) + (hitsBonus ? BONUS_SCORE : 0);
@@ -483,9 +514,12 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
   let nextHazards = state.hazards
     .map((hazard) => ({ ...hazard, ttl: hazard.ttl - 1 }))
     .filter((hazard) => hazard.ttl > 0);
+  const hazardsForSpawns = state.movingHazard
+    ? [...nextHazards, state.movingHazard]
+    : nextHazards;
 
   if (!nextBonus && rng() < BONUS_SPAWN_CHANCE) {
-    const spawnedBonus = spawnBonus(newSnake, nextFood, nextHazards, rng, theme);
+    const spawnedBonus = spawnBonus(newSnake, nextFood, hazardsForSpawns, rng, theme);
     if (spawnedBonus) {
       nextBonus = spawnedBonus;
     }
@@ -496,7 +530,7 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
       newSnake,
       nextFood,
       nextBonus,
-      nextHazards,
+      hazardsForSpawns,
       rng,
       theme
     );
@@ -514,6 +548,7 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
     food: nextFood,
     bonus: nextBonus,
     hazards: nextHazards,
+    movingHazard: state.movingHazard,
     grow: nextGrow,
     score: nextScore,
     status,
@@ -564,6 +599,8 @@ let directionQueue = [];
 let timer = null;
 let paused = false;
 let awaitingName = false;
+let snakeAccumulator = 0;
+let movingHazardAccumulator = 0;
 
 function start() {
   if (timer) {
@@ -576,22 +613,47 @@ function tick() {
   if (paused) {
     return;
   }
-  const prevStatus = state.status;
-  const inputDirection = directionQueue.shift();
-  state = step(state, inputDirection, Math.random, currentTheme);
+  updateGame(TICK_MS);
   render();
-  if (prevStatus === "running" && state.status !== "running") {
-    handleGameEnd();
-  }
-  if (state.status === "game-over" || state.status === "won") {
-    stop();
-  }
 }
 
 function stop() {
   if (timer) {
     clearInterval(timer);
     timer = null;
+  }
+}
+
+function updateGame(deltaMs) {
+  if (state.status !== "running" || paused) {
+    return;
+  }
+  snakeAccumulator += deltaMs;
+  movingHazardAccumulator += deltaMs;
+
+  while (snakeAccumulator >= TICK_MS && state.status === "running") {
+    const prevStatus = state.status;
+    const inputDirection = directionQueue.shift();
+    state = step(state, inputDirection, Math.random, currentTheme);
+    snakeAccumulator -= TICK_MS;
+    if (prevStatus === "running" && state.status !== "running") {
+      handleGameEnd();
+    }
+  }
+
+  state = ensureMovingHazard(state);
+  const moveInterval = getMovingHazardInterval(state.score);
+  while (
+    state.status === "running" &&
+    state.movingHazard &&
+    movingHazardAccumulator >= moveInterval
+  ) {
+    state = moveMovingHazard(state);
+    movingHazardAccumulator -= moveInterval;
+  }
+
+  if (state.status === "game-over" || state.status === "won") {
+    stop();
   }
 }
 
@@ -603,6 +665,8 @@ function reset(options = {}) {
   state = createInitialState(Math.random, currentTheme);
   directionQueue = [];
   paused = false;
+  snakeAccumulator = 0;
+  movingHazardAccumulator = 0;
   awaitingName = false;
   highscorePrompt.classList.remove("show");
   overlay.classList.remove("show");
@@ -642,7 +706,7 @@ function render() {
     ctx.stroke();
   }
 
-  state.hazards.forEach((hazard) => {
+  getAllHazards(state).forEach((hazard) => {
     drawHazard(hazard);
   });
 
@@ -1633,6 +1697,43 @@ function setOverlayImageVisible(visible) {
   if (!overlayImage) return;
   overlayImage.classList.toggle("show", visible);
 }
+
+function renderGameToText() {
+  const hazards = getAllHazards(state).map((hazard) => {
+    const size = normalizeSize(hazard.size || 1);
+    return {
+      x: hazard.x,
+      y: hazard.y,
+      w: size.w,
+      h: size.h,
+      type: hazard.type?.id || "hazard",
+    };
+  });
+  const payload = {
+    mode: state.status,
+    theme: currentTheme?.name || "",
+    score: state.score,
+    snake: {
+      head: state.snake[0],
+      length: state.snake.length,
+    },
+    food: state.food ? { x: state.food.x, y: state.food.y, type: state.food.type?.id } : null,
+    bonus: state.bonus ? { x: state.bonus.x, y: state.bonus.y, type: state.bonus.type?.id } : null,
+    hazards,
+    coordSystem: "origin top-left, x right, y down, units: grid cells",
+  };
+  return JSON.stringify(payload);
+}
+
+window.render_game_to_text = renderGameToText;
+window.advanceTime = (ms) => {
+  const steps = Math.max(1, Math.round(ms / 16));
+  const slice = ms / steps;
+  for (let i = 0; i < steps; i += 1) {
+    updateGame(slice);
+  }
+  render();
+};
 
 function handleTouchStart(event) {
   const touch = event.touches[0];
