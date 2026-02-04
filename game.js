@@ -231,7 +231,7 @@ function spawnFood(snake, rng, theme, bonus, hazards) {
 
 function spawnBonus(snake, food, hazards, rng, theme) {
   const occupied = buildOccupied(snake, food, null, hazards);
-  const point = spawnAtEmpty(occupied, rng);
+  const point = spawnAtEmpty(occupied, rng, snake);
   if (!point) return null;
   return { ...point, ttl: BONUS_TTL, type: pickOne(theme.bonusItems, rng) };
 }
@@ -248,7 +248,7 @@ function spawnHazard(snake, food, bonus, hazards, rng, theme) {
         : [{ w: 3, h: 3 }, { w: 2, h: 2 }];
   for (const size of sizeOptions) {
     const dims = normalizeSize(size);
-    const point = spawnAreaAtEmpty(occupied, rng, dims.w, dims.h);
+    const point = spawnAreaAtEmpty(occupied, rng, dims.w, dims.h, snake);
     if (point) {
       return {
         ...point,
@@ -277,7 +277,7 @@ function buildOccupied(snake, food, bonus, hazards) {
   return occupied;
 }
 
-function spawnAtEmpty(occupied, rng) {
+function spawnAtEmpty(occupied, rng, snake = null) {
   const empty = [];
   for (let y = 0; y < GRID_SIZE; y += 1) {
     for (let x = 0; x < GRID_SIZE; x += 1) {
@@ -290,11 +290,23 @@ function spawnAtEmpty(occupied, rng) {
   if (empty.length === 0) {
     return null;
   }
-  const idx = Math.floor(rng() * empty.length);
-  return empty[idx];
+  if (!snake || snake.length === 0) {
+    const idx = Math.floor(rng() * empty.length);
+    return empty[idx];
+  }
+  const head = snake[0];
+  const sorted = empty
+    .map((point) => ({
+      point,
+      dist: Math.abs(point.x - head.x) + Math.abs(point.y - head.y),
+    }))
+    .sort((a, b) => b.dist - a.dist);
+  const topCount = Math.max(1, Math.floor(sorted.length * 0.35));
+  const pick = sorted[Math.floor(rng() * topCount)];
+  return pick.point;
 }
 
-function spawnAreaAtEmpty(occupied, rng, width, height) {
+function spawnAreaAtEmpty(occupied, rng, width, height, snake = null) {
   const empty = [];
   for (let y = 0; y <= GRID_SIZE - height; y += 1) {
     for (let x = 0; x <= GRID_SIZE - width; x += 1) {
@@ -311,8 +323,20 @@ function spawnAreaAtEmpty(occupied, rng, width, height) {
     }
   }
   if (empty.length === 0) return null;
-  const idx = Math.floor(rng() * empty.length);
-  return empty[idx];
+  if (!snake || snake.length === 0) {
+    const idx = Math.floor(rng() * empty.length);
+    return empty[idx];
+  }
+  const head = snake[0];
+  const sorted = empty
+    .map((point) => ({
+      point,
+      dist: Math.abs(point.x - head.x) + Math.abs(point.y - head.y),
+    }))
+    .sort((a, b) => b.dist - a.dist);
+  const topCount = Math.max(1, Math.floor(sorted.length * 0.35));
+  const pick = sorted[Math.floor(rng() * topCount)];
+  return pick.point;
 }
 
 function pickOne(list, rng) {
@@ -346,8 +370,24 @@ function randomDirection() {
     { dx: -1, dy: 0 },
     { dx: 0, dy: 1 },
     { dx: 0, dy: -1 },
+    { dx: 1, dy: 1 },
+    { dx: 1, dy: -1 },
+    { dx: -1, dy: 1 },
+    { dx: -1, dy: -1 },
   ];
   return dirs[Math.floor(Math.random() * dirs.length)];
+}
+
+function directionWithBounce(dx, dy, w, h, x, y) {
+  let nextDx = dx;
+  let nextDy = dy;
+  if (x + nextDx < 0 || x + w + nextDx > GRID_SIZE) {
+    nextDx *= -1;
+  }
+  if (y + nextDy < 0 || y + h + nextDy > GRID_SIZE) {
+    nextDy *= -1;
+  }
+  return { dx: nextDx, dy: nextDy };
 }
 
 function getAllHazards(currentState) {
@@ -372,7 +412,7 @@ function ensureMovingHazard(currentState) {
     currentState.bonus,
     currentState.hazards
   );
-  const point = spawnAreaAtEmpty(occupied, Math.random, 2, 2);
+  const point = spawnAreaAtEmpty(occupied, Math.random, 2, 2, currentState.snake);
   if (!point) return currentState;
   return {
     ...currentState,
@@ -397,21 +437,11 @@ function moveMovingHazard(currentState) {
     currentState.bonus,
     currentState.hazards
   );
-  let { dx, dy } = hazard.dir || { dx: 1, dy: 0 };
-  let nx = hazard.x + dx;
-  let ny = hazard.y + dy;
-  let bounced = false;
-
-  if (nx < 0 || nx + w > GRID_SIZE) {
-    dx *= -1;
-    bounced = true;
-  }
-  if (ny < 0 || ny + h > GRID_SIZE) {
-    dy *= -1;
-    bounced = true;
-  }
-  nx = hazard.x + dx;
-  ny = hazard.y + dy;
+  let { dx, dy } = hazard.dir || randomDirection();
+  let { dx: ndx, dy: ndy } = directionWithBounce(dx, dy, w, h, hazard.x, hazard.y);
+  let nx = hazard.x + ndx;
+  let ny = hazard.y + ndy;
+  let bounced = ndx !== dx || ndy !== dy;
 
   if (nx < 0 || ny < 0 || nx + w > GRID_SIZE || ny + h > GRID_SIZE) {
     nx = hazard.x;
@@ -423,11 +453,12 @@ function moveMovingHazard(currentState) {
     moved = nx !== hazard.x || ny !== hazard.y;
   } else {
     if (!bounced) {
-      dx *= -1;
-      dy *= -1;
+      ndx *= -1;
+      ndy *= -1;
+      bounced = true;
     }
-    nx = hazard.x + dx;
-    ny = hazard.y + dy;
+    nx = hazard.x + ndx;
+    ny = hazard.y + ndy;
     if (
       nx >= 0 &&
       ny >= 0 &&
@@ -442,13 +473,19 @@ function moveMovingHazard(currentState) {
     }
   }
 
+  if (bounced) {
+    const newDir = randomDirection();
+    ndx = newDir.dx;
+    ndy = newDir.dy;
+  }
+
   return {
     ...currentState,
     movingHazard: {
       ...hazard,
       x: nx,
       y: ny,
-      dir: { dx, dy },
+      dir: { dx: ndx, dy: ndy },
       flip: moved ? !hazard.flip : hazard.flip,
     },
   };
