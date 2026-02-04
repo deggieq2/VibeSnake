@@ -806,7 +806,7 @@ function render() {
 
   if (state.status === "game-over") {
     if (!awaitingName) {
-      overlayMessage.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
+      overlayMessage.textContent = getGameOverMessage(state.score);
       overlay.classList.add("show");
       setOverlayRestartVisible(true);
       setOverlayImageVisible(true);
@@ -1824,7 +1824,7 @@ function skipHighScore() {
   if (!awaitingName) return;
   awaitingName = false;
   highscorePrompt.classList.remove("show");
-  overlayMessage.textContent = `Game over. Score ${state.score}. Press Enter to restart.`;
+  overlayMessage.textContent = getGameOverMessage(state.score);
   overlay.classList.add("show");
   setOverlayRestartVisible(true);
   setOverlayImageVisible(true);
@@ -1948,6 +1948,19 @@ function showThemeMessage(message) {
       overlayMessage.textContent = "";
     }
   }, 1800);
+}
+
+function getGameOverMessage(score) {
+  switch (currentTheme.id) {
+    case "candy":
+      return `Game Over - You helped Dave get ${score} In the Pink`;
+    case "stink":
+      return `Game Over - You helped Dave get ${score} In the Stink`;
+    case "pipe":
+      return `Game Over - You helped Dave Lay ${score} pipe`;
+    default:
+      return `Game over. Score ${score}. Press Enter to restart.`;
+  }
 }
 
 function renderGameToText() {
