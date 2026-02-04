@@ -53,14 +53,7 @@ body[data-theme="stink"] {
   background-position: 0 0, 0 0, 18px 18px;
 }
 
-body[data-theme="jungle"] {
-  background-image:
-    radial-gradient(circle at top, #2c5f40 0%, #1e4731 55%, #143322 100%),
-    radial-gradient(rgba(57, 124, 82, 0.32) 2px, transparent 0),
-    radial-gradient(rgba(28, 88, 56, 0.28) 2px, transparent 0);
-  background-size: auto, 36px 36px, 56px 56px;
-  background-position: 0 0, 0 0, 18px 18px;
-}
+/* Jungle theme temporarily removed */
 
 .wrap {
   max-width: 720px;

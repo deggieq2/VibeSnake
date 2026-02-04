@@ -151,53 +151,6 @@ const THEMES = [
       },
     ],
   },
-  {
-    id: "jungle",
-    name: "Jungle",
-    ui: {
-      "--bg": "#1d3a2a",
-      "--panel": "#1f3d2e",
-      "--text": "#f1f7ea",
-      "--muted": "#b8c8b1",
-      "--panel-border": "#2b5b41",
-      "--panel-shadow": "#173025",
-      "--button-border": "#2b5b41",
-      "--button-shadow": "#173025",
-      "--button-bg": "#244737",
-      "--canvas-bg": "#1d3a2a",
-      "--overlay-bg": "rgba(25, 44, 33, 0.78)",
-    },
-    palette: {
-      canvas: "#1d3a2a",
-      grid: "#2a4f3a",
-      snake: "#f5a7c0",
-      snakeHead: "#f09ab7",
-      snakeStroke: "#b5677c",
-      food: "#ff7ac8",
-      foodLeaf: "#7bdff6",
-      foodStem: "#ffb3d9",
-      bonus: "#ffd24a",
-      bonusStroke: "#b87812",
-      hazard: "#c57b39",
-      hazardStroke: "#6b3b12",
-      eyeWhite: "#f9f7ef",
-      eyePupil: "#1a1a1a",
-    },
-    fruits: [
-      { id: "candy", color: "#ff7ac8" },
-      { id: "lollipop", color: "#ff6b9e" },
-      { id: "donut", color: "#ff9ad5" },
-      { id: "gummy", color: "#ff5ac1" },
-    ],
-    bonusItems: [
-      { id: "star", color: "#ffd24a" },
-      { id: "gem", color: "#6ee7ff" },
-    ],
-    hazards: [
-      { id: "scorpion", color: "#c57b39" },
-      { id: "beetle", color: "#7b4a2b" },
-    ],
-  },
 ];
 
 function createInitialState(rng = Math.random, theme = currentTheme) {
