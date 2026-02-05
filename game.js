@@ -1,5 +1,6 @@
 const GRID_SIZE = 20;
-const TICK_MS = 140;
+const BASE_SNAKE_MS = 140;
+const FRAME_MS = 16;
 const MAX_QUEUE = 2;
 const BONUS_SCORE = 5;
 const BONUS_TTL = 35;
@@ -8,6 +9,7 @@ const HAZARD_TTL = 55;
 const HAZARD_SPAWN_CHANCE = 0.03;
 const MAX_HAZARDS = 2;
 const MOVING_HAZARD_START_SCORE = 20;
+const MOVING_HAZARD_SECOND_SCORE = 200;
 const MOVING_HAZARD_BASE_MS = 720;
 const MOVING_HAZARD_MIN_MS = 176;
 const HIGH_SCORE_KEY = "vibesnake_highscores";
@@ -232,7 +234,7 @@ function createInitialState(rng = Math.random, theme = currentTheme) {
     food: null,
     bonus: null,
     hazards: [],
-    movingHazard: null,
+    movingHazards: [],
     grow: 0,
     score: 0,
     status: "running",
@@ -411,8 +413,9 @@ function directionWithBounce(dx, dy, w, h, x, y) {
 }
 
 function getAllHazards(currentState) {
-  if (currentState.movingHazard) {
-    return [...currentState.hazards, currentState.movingHazard];
+  const moving = currentState.movingHazards || [];
+  if (moving.length > 0) {
+    return [...currentState.hazards, ...moving];
   }
   return currentState.hazards;
 }
@@ -422,42 +425,79 @@ function getMovingHazardInterval(score) {
   return Math.max(MOVING_HAZARD_MIN_MS, adjusted);
 }
 
-function ensureMovingHazard(currentState) {
-  if (currentState.score < MOVING_HAZARD_START_SCORE || currentState.movingHazard) {
-    return currentState;
-  }
-  const occupied = buildOccupied(
-    currentState.snake,
-    currentState.food,
-    currentState.bonus,
-    currentState.hazards
-  );
+function getSnakeInterval(score) {
+  if (score >= 350) return 108;
+  if (score >= 250) return 118;
+  if (score >= 150) return 128;
+  return BASE_SNAKE_MS;
+}
+
+function getDesiredMovingHazardCount(score) {
+  if (score >= MOVING_HAZARD_SECOND_SCORE) return 2;
+  if (score >= MOVING_HAZARD_START_SCORE) return 1;
+  return 0;
+}
+
+function spawnMovingHazard(currentState, occupied) {
   const point = spawnAreaAtEmpty(occupied, Math.random, 2, 2, currentState.snake);
-  if (!point) return currentState;
+  if (!point) return null;
   return {
-    ...currentState,
-    movingHazard: {
-      x: point.x,
-      y: point.y,
-      size: { w: 2, h: 2 },
-      type: { id: "image", image: true },
-      dir: randomDirection(),
-      flip: Math.random() < 0.5,
-    },
+    x: point.x,
+    y: point.y,
+    size: { w: 2, h: 2 },
+    type: { id: "image", image: true },
+    dir: randomDirection(),
+    flip: Math.random() < 0.5,
   };
 }
 
-function moveMovingHazard(currentState) {
-  if (!currentState.movingHazard) return currentState;
-  const hazard = currentState.movingHazard;
+function ensureMovingHazards(currentState) {
+  const desired = getDesiredMovingHazardCount(currentState.score);
+  const existing = currentState.movingHazards || [];
+  if (existing.length >= desired) {
+    return currentState;
+  }
+  const next = [...existing];
+  for (let i = next.length; i < desired; i += 1) {
+    const occupied = buildOccupied(
+      currentState.snake,
+      currentState.food,
+      currentState.bonus,
+      [...currentState.hazards, ...next]
+    );
+    const spawned = spawnMovingHazard(currentState, occupied);
+    if (!spawned) break;
+    next.push(spawned);
+  }
+  return {
+    ...currentState,
+    movingHazards: next,
+  };
+}
+
+function getBonusDirection(hazard, bonus) {
+  if (!bonus) return null;
+  const dx = Math.sign(bonus.x - hazard.x);
+  const dy = Math.sign(bonus.y - hazard.y);
+  if (dx === 0 && dy === 0) return null;
+  return { dx, dy };
+}
+
+function moveSingleMovingHazard(currentState, hazard, index, hazardsList) {
   const { w, h } = normalizeSize(hazard.size || 2);
+  const otherMoving = hazardsList.filter((_, idx) => idx !== index);
   const occupied = buildOccupied(
     currentState.snake,
     currentState.food,
     currentState.bonus,
-    currentState.hazards
+    [...currentState.hazards, ...otherMoving]
   );
+  const bonusDir = getBonusDirection(hazard, currentState.bonus);
   let { dx, dy } = hazard.dir || randomDirection();
+  if (bonusDir && Math.random() < 0.45) {
+    dx = bonusDir.dx;
+    dy = bonusDir.dy;
+  }
   let { dx: ndx, dy: ndy } = directionWithBounce(dx, dy, w, h, hazard.x, hazard.y);
   let nx = hazard.x + ndx;
   let ny = hazard.y + ndy;
@@ -497,17 +537,29 @@ function moveMovingHazard(currentState) {
     const newDir = randomDirection();
     ndx = newDir.dx;
     ndy = newDir.dy;
+  } else if (bonusDir && Math.random() < 0.25) {
+    ndx = bonusDir.dx;
+    ndy = bonusDir.dy;
   }
 
   return {
+    ...hazard,
+    x: nx,
+    y: ny,
+    dir: { dx: ndx, dy: ndy },
+    flip: moved ? !hazard.flip : hazard.flip,
+  };
+}
+
+function moveMovingHazards(currentState) {
+  const hazards = currentState.movingHazards || [];
+  if (hazards.length === 0) return currentState;
+  const next = hazards.map((hazard, index) =>
+    moveSingleMovingHazard(currentState, hazard, index, hazards)
+  );
+  return {
     ...currentState,
-    movingHazard: {
-      ...hazard,
-      x: nx,
-      y: ny,
-      dir: { dx: ndx, dy: ndy },
-      flip: moved ? !hazard.flip : hazard.flip,
-    },
+    movingHazards: next,
   };
 }
 
@@ -559,8 +611,9 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
   const nextFood = willEat
     ? spawnFood(newSnake, rng, theme, remainingBonus, allHazards)
     : state.food;
-  const nextScore =
-    state.score + (willEat ? 1 : 0) + (hitsBonus ? BONUS_SCORE : 0);
+  const scoreMultiplier = state.score >= 200 ? 2 : 1;
+  const baseScore = (willEat ? 1 : 0) + (hitsBonus ? BONUS_SCORE : 0);
+  const nextScore = state.score + baseScore * scoreMultiplier;
 
   let nextBonus = remainingBonus ? { ...remainingBonus, ttl: remainingBonus.ttl - 1 } : null;
   if (nextBonus && nextBonus.ttl <= 0) {
@@ -570,9 +623,10 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
   let nextHazards = state.hazards
     .map((hazard) => ({ ...hazard, ttl: hazard.ttl - 1 }))
     .filter((hazard) => hazard.ttl > 0);
-  const hazardsForSpawns = state.movingHazard
-    ? [...nextHazards, state.movingHazard]
-    : nextHazards;
+  const hazardsForSpawns =
+    state.movingHazards && state.movingHazards.length > 0
+      ? [...nextHazards, ...state.movingHazards]
+      : nextHazards;
 
   if (!nextBonus && rng() < BONUS_SPAWN_CHANCE) {
     const spawnedBonus = spawnBonus(newSnake, nextFood, hazardsForSpawns, rng, theme);
@@ -604,7 +658,7 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
     food: nextFood,
     bonus: nextBonus,
     hazards: nextHazards,
-    movingHazard: state.movingHazard,
+    movingHazards: state.movingHazards,
     grow: nextGrow,
     score: nextScore,
     status,
@@ -672,14 +726,14 @@ function start() {
   if (timer) {
     clearInterval(timer);
   }
-  timer = setInterval(tick, TICK_MS);
+  timer = setInterval(tick, FRAME_MS);
 }
 
 function tick() {
   if (paused) {
     return;
   }
-  updateGame(TICK_MS);
+  updateGame(FRAME_MS);
   render();
 }
 
@@ -697,24 +751,26 @@ function updateGame(deltaMs) {
   snakeAccumulator += deltaMs;
   movingHazardAccumulator += deltaMs;
 
-  while (snakeAccumulator >= TICK_MS && state.status === "running") {
+  const snakeInterval = getSnakeInterval(state.score);
+  while (snakeAccumulator >= snakeInterval && state.status === "running") {
     const prevStatus = state.status;
     const inputDirection = directionQueue.shift();
     state = step(state, inputDirection, Math.random, currentTheme);
-    snakeAccumulator -= TICK_MS;
+    snakeAccumulator -= snakeInterval;
     if (prevStatus === "running" && state.status !== "running") {
       handleGameEnd();
     }
   }
 
-  state = ensureMovingHazard(state);
+  state = ensureMovingHazards(state);
   const moveInterval = getMovingHazardInterval(state.score);
   while (
     state.status === "running" &&
-    state.movingHazard &&
+    state.movingHazards &&
+    state.movingHazards.length > 0 &&
     movingHazardAccumulator >= moveInterval
   ) {
-    state = moveMovingHazard(state);
+    state = moveMovingHazards(state);
     movingHazardAccumulator -= moveInterval;
   }
 

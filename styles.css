@@ -301,6 +301,19 @@ h1 {
   color: var(--muted);
   font-size: 12px;
   text-align: center;
+  display: grid;
+  gap: 6px;
+}
+
+.help a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.help a:hover,
+.help a:focus-visible {
+  text-decoration: underline;
 }
 
 .leaderboard {

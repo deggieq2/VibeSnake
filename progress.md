@@ -15,3 +15,6 @@ Original prompt: Can you add after 30points a slow moving hazard.png 2x2 that mo
 - Added pipe snake rendering, plumbing collectibles, valve/water hazards, and blue background.
 - Playwright run failed again with MachPortRendezvousServer permission error (sandbox issue).
 - Pipe theme now shows a start overlay with message and Start button before gameplay begins.
+- Added a second moving hazard after 200 points; moving hazards now bias toward bonus items.
+- Increased snake speed at score thresholds (150/250/350) via dynamic tick interval.
+- Scores now double for food/bonus once score >= 200.
