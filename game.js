@@ -677,7 +677,14 @@ function step(state, inputDirection, rng = Math.random, theme = currentTheme) {
   const nextFood = willEat
     ? spawnFood(newSnake, rng, theme, remainingBonus, allHazards)
     : state.food;
-  const scoreMultiplier = state.score >= 200 ? 2 : 1;
+  let scoreMultiplier = 1;
+  if (state.score >= 300) {
+    scoreMultiplier = 8;
+  } else if (state.score >= 200) {
+    scoreMultiplier = 4;
+  } else if (state.score >= 100) {
+    scoreMultiplier = 2;
+  }
   const baseScore = (willEat ? 1 : 0) + (hitsBonus ? BONUS_SCORE : 0);
   const nextScore = state.score + baseScore * scoreMultiplier;
 
