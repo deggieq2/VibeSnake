@@ -18,3 +18,4 @@ Original prompt: Can you add after 30points a slow moving hazard.png 2x2 that mo
 - Added a second moving hazard after 200 points; moving hazards now bias toward bonus items.
 - Increased snake speed at score thresholds (150/250/350) via dynamic tick interval.
 - Scores now double for food/bonus once score >= 200.
+- Replaced cloud hazards with splash-style white liquid hazards (more varied sizes, no black outline).

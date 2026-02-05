@@ -78,23 +78,47 @@ const THEMES = [
     ],
     hazards: [
       {
-        id: "cloud",
+        id: "splash",
         color: "#ffffff",
         sizeOptions: [
+          { w: 2, h: 2 },
           { w: 3, h: 2 },
-          { w: 4, h: 3 },
-          { w: 2, h: 3 },
           { w: 4, h: 2 },
+          { w: 5, h: 2 },
+          { w: 2, h: 3 },
+          { w: 3, h: 3 },
+          { w: 4, h: 3 },
+          { w: 5, h: 3 },
+          { w: 2, h: 4 },
+          { w: 3, h: 4 },
+          { w: 4, h: 4 },
+          { w: 5, h: 4 },
+          { w: 2, h: 5 },
+          { w: 3, h: 5 },
+          { w: 4, h: 5 },
+          { w: 5, h: 5 },
         ],
       },
       {
-        id: "cloud-dark",
-        color: "#f1f5ff",
+        id: "splash-foam",
+        color: "#f6fbff",
         sizeOptions: [
+          { w: 2, h: 2 },
           { w: 3, h: 2 },
-          { w: 4, h: 3 },
-          { w: 2, h: 3 },
           { w: 4, h: 2 },
+          { w: 5, h: 2 },
+          { w: 2, h: 3 },
+          { w: 3, h: 3 },
+          { w: 4, h: 3 },
+          { w: 5, h: 3 },
+          { w: 2, h: 4 },
+          { w: 3, h: 4 },
+          { w: 4, h: 4 },
+          { w: 5, h: 4 },
+          { w: 2, h: 5 },
+          { w: 3, h: 5 },
+          { w: 4, h: 5 },
+          { w: 5, h: 5 },
         ],
       },
     ],
@@ -143,8 +167,50 @@ const THEMES = [
       { id: "gem", color: "#6ee7ff" },
     ],
     hazards: [
-      { id: "cloud", color: "#ffffff" },
-      { id: "cloud-dark", color: "#f1f5ff" },
+      {
+        id: "splash",
+        color: "#ffffff",
+        sizeOptions: [
+          { w: 2, h: 2 },
+          { w: 3, h: 2 },
+          { w: 4, h: 2 },
+          { w: 5, h: 2 },
+          { w: 2, h: 3 },
+          { w: 3, h: 3 },
+          { w: 4, h: 3 },
+          { w: 5, h: 3 },
+          { w: 2, h: 4 },
+          { w: 3, h: 4 },
+          { w: 4, h: 4 },
+          { w: 5, h: 4 },
+          { w: 2, h: 5 },
+          { w: 3, h: 5 },
+          { w: 4, h: 5 },
+          { w: 5, h: 5 },
+        ],
+      },
+      {
+        id: "splash-foam",
+        color: "#f8fdff",
+        sizeOptions: [
+          { w: 2, h: 2 },
+          { w: 3, h: 2 },
+          { w: 4, h: 2 },
+          { w: 5, h: 2 },
+          { w: 2, h: 3 },
+          { w: 3, h: 3 },
+          { w: 4, h: 3 },
+          { w: 5, h: 3 },
+          { w: 2, h: 4 },
+          { w: 3, h: 4 },
+          { w: 4, h: 4 },
+          { w: 5, h: 4 },
+          { w: 2, h: 5 },
+          { w: 3, h: 5 },
+          { w: 4, h: 5 },
+          { w: 5, h: 5 },
+        ],
+      },
       {
         id: "log",
         color: "#6b4b3a",
@@ -1343,8 +1409,8 @@ function drawHazard(hazard) {
     drawHazardImage(hazard);
     return;
   }
-  if (id.includes("cloud")) {
-    drawCloud(hazard);
+  if (id.includes("splash")) {
+    drawSplash(hazard);
     return;
   }
   if (id.includes("puddle")) {
@@ -1379,7 +1445,7 @@ function drawHazard(hazard) {
     drawWaterPuddle(hazard);
     return;
   }
-  drawCloud(hazard);
+  drawSplash(hazard);
 }
 
 function drawRock(point) {
@@ -1549,25 +1615,65 @@ function drawWaterPuddle(hazard) {
   ctx.stroke();
 }
 
-function drawCloud(hazard) {
-  const { centerX, centerY, widthPx, heightPx, sizePx } = hazardMetrics(hazard);
-  const r = Math.min(widthPx, heightPx) * 0.18;
-  ctx.fillStyle = hazard.type?.color || colors.hazard;
-  const offsets = [
-    { x: -r * 1.6, y: 0 },
-    { x: -r * 0.6, y: -r * 0.8 },
-    { x: r * 0.7, y: -r * 0.4 },
-    { x: r * 1.6, y: 0 },
-  ];
-  offsets.forEach((o) => {
+function seededRandom(seed) {
+  let value = seed % 2147483647;
+  if (value <= 0) value += 2147483646;
+  return () => {
+    value = (value * 16807) % 2147483647;
+    return (value - 1) / 2147483646;
+  };
+}
+
+function drawSplash(hazard) {
+  const { centerX, centerY, widthPx, heightPx } = hazardMetrics(hazard);
+  const seed =
+    (hazard.x + 1) * 73856093 +
+    (hazard.y + 1) * 19349663 +
+    Math.round(widthPx) * 83492791 +
+    Math.round(heightPx) * 49979693;
+  const rand = seededRandom(seed);
+  const color = hazard.type?.color || colors.hazard;
+  const baseR = Math.min(widthPx, heightPx) * 0.22;
+  const count = 5 + Math.floor(rand() * 4);
+
+  ctx.fillStyle = color;
+  for (let i = 0; i < count; i += 1) {
+    const angle = rand() * Math.PI * 2;
+    const radius = baseR * (0.55 + rand() * 0.6);
+    const spreadX = widthPx * 0.35;
+    const spreadY = heightPx * 0.35;
+    const offsetX = Math.cos(angle) * spreadX * rand();
+    const offsetY = Math.sin(angle) * spreadY * rand();
     ctx.beginPath();
-    ctx.arc(centerX + o.x, centerY + o.y, r, 0, Math.PI * 2);
+    ctx.ellipse(
+      centerX + offsetX,
+      centerY + offsetY,
+      radius * (0.7 + rand() * 0.5),
+      radius * (0.6 + rand() * 0.5),
+      rand() * Math.PI,
+      0,
+      Math.PI * 2
+    );
     ctx.fill();
-  });
-  ctx.fillRect(centerX - r * 2, centerY, r * 4, r * 1.3);
-  ctx.strokeStyle = colors.hazardStroke;
-  ctx.lineWidth = Math.max(1, sizePx * 0.04);
-  ctx.strokeRect(centerX - r * 2, centerY - r * 0.2, r * 4, r * 1.5);
+  }
+
+  const dropletCount = 3 + Math.floor(rand() * 3);
+  for (let i = 0; i < dropletCount; i += 1) {
+    const angle = rand() * Math.PI * 2;
+    const dist = Math.max(widthPx, heightPx) * (0.25 + rand() * 0.25);
+    const r = baseR * (0.25 + rand() * 0.25);
+    ctx.beginPath();
+    ctx.ellipse(
+      centerX + Math.cos(angle) * dist,
+      centerY + Math.sin(angle) * dist,
+      r * 0.9,
+      r * 0.7,
+      rand() * Math.PI,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+  }
 }
 
 function fruitMetrics(point, scale) {
